@@ -4,7 +4,7 @@ c  Author:       Lucas Jacobson
 c  Created on:   September 24, 2025
 c  Last updated: September 24, 2025
 c
-c  Copyright 2025, SHINE Technologies. All rights reserved.
+c  Copyright 2026, SHINE Technologies. All rights reserved.
 c
 c ******************************************************************************
 c

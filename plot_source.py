@@ -39,7 +39,7 @@ def main():
     # Plot angular distribution
     si2      = text.split(' si2 ')[1].split(' sp2 ')[0].split()
     sp2      = text.split(' sp2 ')[1].split('c'    )[0].split()
-    dist_a_x = np.acos(np.array([float(x) for x in si2[1:]]))[::-1]
+    dist_a_x = np.acos(np.array([float(x) for x in si2]))[::-1]
     areas    = (np.cos(dist_a_x)[:-1] - np.cos(dist_a_x)[1:]) * 2 * np.pi
     dist_a_p = np.array([float(x) for x in sp2[1:]])[::-1] / areas
     xvals_p  = np.append(dist_a_x, 2 * np.pi - np.flip(dist_a_x[:-1], 0))
@@ -59,23 +59,19 @@ def main():
     plt.close()
 
     # Plot radial distribution
-    ds3      = text.split(' si101 ')[1].split('c')[0].split()
-    ds3      = [x for x in ds3 if not x.startswith('si') and not x == '0']
+    ds3      = [float(x.split('$')[0].split()[-1]) for x in text.split(' si101 ')[1].split('\nc')[0].split('\n')]
     dist_r_x = np.array([float(x) for x in ds3])[::-1]
     xvals_p  = np.append(dist_z_x, dist_z_x[-1])
     yvals_p  = np.append(np.append(0, dist_r_x), 0)
     fig, ax = plt.subplots(1, 1)
     fig.set_size_inches(8, 6)
-    ax.step(xvals_p,  yvals_p, label='MCNP')
+    ax.step(xvals_p,  yvals_p)
     plt.gca().set_prop_cycle(None)
     ax.step(xvals_p, -yvals_p)
-    ax.plot([0, 137, 137, 0, 0],
-            [2.5263, 2.5263, -2.5263, -2.5263, 2.5263], label='OpenMC')
     ax.set_xlabel('Distance from top of target chamber [cm]')
     ax.set_ylabel('Maximum neutron emission radius [cm]')
     ax.set_title('SHINE NDAS radial neutron source distribution')
     ax.grid()
-    ax.legend()
     plt.tight_layout()
     fname = os.path.join('images', 'profile_radial.png')
     print('Writing %s' % (fname))
@@ -86,9 +82,9 @@ def main():
     num_angle = len(dist_a_x) - 1
     spectra = np.zeros((num_angle, 1601))
     for i in range(num_angle):
-        si = text.split(' si%u ' % (i + 5))[1].split(' sp%u ' % (i + 5))[0]
-        sp = text.split(' sp%u ' % (i + 5))[1].split('c'               )[0]
-        e_vals = [float(x) for x in si.split()[1:] if not x.endswith('i')]
+        si = text.split(' si%u ' % (501 + i))[1].split(' sp%u ' % (501 + i))[0]
+        sp = text.split(' sp%u ' % (501 + i))[1].split('c'                 )[0]
+        e_vals = [float(x) for x in si.split() if not x.endswith('i')]
         e_inds = [round(x * 100) for x in e_vals]
         e_dist = np.array([float(x) for x in sp.split()])
         spectra[i, e_inds[0]:e_inds[1] + 1] = e_dist[:e_inds[1] - e_inds[0] + 1 ]
@@ -111,7 +107,7 @@ def main():
     ax.set_xlim(13, 15.4)
     ax.xaxis.set_major_locator(mticker.MultipleLocator(base=0.2))
     ax.set_xlabel('Neutron energy [MeV]')
-    ax.set_ylabel('Neutron source [n/MeV-sr-s]')
+    ax.set_ylabel('Neutron source [n/MeV-s]')
     ax.set_title('SHINE NDAS angular-dependent neutron energy distribution (MCNP only)')
     ax.grid()
     ax.legend(loc='upper right')

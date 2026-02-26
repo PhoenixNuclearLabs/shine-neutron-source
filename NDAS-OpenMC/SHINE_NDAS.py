@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # ******************************************************************************
-# Copyright 2025, SHINE Technologies. All rights reserved.
+# Copyright 2026, SHINE Technologies. All rights reserved.
 # ******************************************************************************
 
 import os
@@ -10,11 +10,11 @@ import openmc
 
 import sys
 sys.dont_write_bytecode = True
-from SHINE_NDAS_source import get_source
+from SHINE_NDAS_source import get_sources
 
 def get_materials():
 
-    xslib = 'endfb-viii.0-hdf5'
+    xslib = 'lib80x_hdf5'
     openmc.Materials.cross_sections = '/home/lucas/openmc_data/%s/cross_sections.xml' % (xslib)
 
     mat_dict = {}
@@ -131,11 +131,11 @@ def get_plots(geom):
 
     return plots
 
-def get_settings(source):
+def get_settings(sources):
 
     settings           = openmc.Settings()
     settings.run_mode  = 'fixed source'
-    settings.source    = source
+    settings.source    = sources
     settings.batches   = 10
     settings.particles = int(1e7)
 
@@ -143,6 +143,7 @@ def get_settings(source):
 
 def main():
 
+    fname_h5 = os.path.join('SHINE_NDAS_source.h5')
     length   = 137.0
     diameter = 3.29 * 2.54
     strength = 2.7e13
@@ -151,8 +152,8 @@ def main():
     geometry  = get_geometry(length, diameter, mat_dict)
     tallies   = get_tallies(geometry)
     plots     = get_plots(geometry)
-    source    = get_source(length, diameter, strength)
-    settings  = get_settings(source)
+    sources   = get_sources(fname_h5, length, diameter, strength)
+    settings  = get_settings(sources)
 
     materials = openmc.Materials(mat_dict.values())
 

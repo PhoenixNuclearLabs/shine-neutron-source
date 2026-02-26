@@ -32,15 +32,16 @@ As it travels through the target chamber, it spreads out with a divergence of 36
 By the time it has reached the bottom of the target chamber, the beam has diverged enough that some of it has impacted the wall.
 (This has a minimal effect on the total neutron yield of the system.)
 
-The effect of the beam divergence is only implemented in MCNP.
-In OpenMC, an average beam diameter of 5.0526 cm is used instead.
+The effect of the beam divergence is implemented in both MCNP and OpenMC.
 
 <p align="center"><img src="./images/profile_radial.png" width="600" /></p>
 
 ### Angular distribution
 The DT fusion cross section is nearly isotropic.
 In the NDAS, just 14% more neutrons are emitted in the forward (downward) direction than the backward (upward) direction.
-In these models, the same angular distribution is used for the entire neutron source term.
+
+In the MCNP model, the angular distribution is independent for reasons that will be described below.
+In the OpenMC model, the angular dependence on position is fully implemented.
 
 <p align="center"><img src="./images/profile_angular.png" width="450" /></p>
 
@@ -48,17 +49,14 @@ In these models, the same angular distribution is used for the entire neutron so
 Neutrons produced in the forward (downward) direction have higher energies than those produced in the backward (upward) direction.
 Also, neutrons produced earlier (higher up) in the target chamber have a larger range of possible energies than neutrons produced later (further down) because the deuteron beam has more energy when it first enters the target chamber.
 
-Unfortunately, it was not possible to include both of these effects in the Monte Carlo source terms provided in this repository because MCNP limits users to a single distribution dependency.
-For example, it is possible to have energy dependent on angle, and it is possible to have energy dependent on position, but it is not possible to have energy dependent on angle which is itself dependent on position.
+Unfortunately, in MCNP, it was not possible to include both of these effects because MCNP limits users to a single distribution dependency.
+For example, it is possible in MCNP to have energy dependent on angle, and it is possible to have energy dependent on position, but it is not possible to have energy dependent on angle which is itself dependent on position.
 
-Thus, the spatial dependence of the energy distribution was not included.
-The energy distribution was made to be solely dependent on angle.
+For MCNP, it was chosen to keep the dependence of energy on angle while ignoring the dependence of energy and angle on position.
+
+OpenMC does not have this limitation, so the dependence of energy on both angle and position is included.
 
 <p align="center"><img src="./images/profile_energy_angle.png" width="600" /></p>
-
-In OpenMC, the energy distribution was made independent as well.
-
-<p align="center"><img src="./images/profile_energy.png" width="600" /></p>
 
 Zooming out on the energy scale shows the small (~0.1%) contribution from DD fusion.
 The target chamber nominally contains 90% tritium gas and 10% deuterium gas, and it is this small quantity of deuterium that accounts for the DD fusion reactions.

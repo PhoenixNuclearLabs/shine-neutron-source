@@ -1,3 +1,4 @@
-/*.h5
-/*.out
+/statepoint*.h5
+/summary.h5
+/tallies.out
 /*.xml
