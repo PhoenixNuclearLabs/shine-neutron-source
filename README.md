@@ -5,7 +5,7 @@ Files for both MCNP and OpenMC are provided.
 ## System overview
 The NDAS has two main sections: the accelerator section (not included in this repository) and the target chamber.
 The purpose of the accelerator section is to create an intense ~300 keV beam of deuterons and guide them towards the target chamber.
-The system is oriented vertically, such that the neutrons are produced at the top of the system and travel downwards until they reach the target chamber.
+The system is oriented vertically, such that the deuterons are produced at the top of the system and travel downwards until they reach the target chamber.
 The target chamber, which contains tritium gas, is where the neutrons are produced.
 
 ## Geometry
