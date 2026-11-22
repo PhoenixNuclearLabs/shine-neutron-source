@@ -5,8 +5,9 @@ c ------------------------------------------------------------------------------
 c
 c [run]
 c name                    = "Artemis"
-c code_version            = "6113b4de3492cfcf55e46f62f4e5a9deee628722"
-c created                 = "2026-11-20T21:08:56+00:00"
+c code_version            = "3eaff23441959f6ed6bc281f2227dcb9692ae252"
+c code_url                = "https://github.com/lucasjacobson/beam-target"
+c created                 = "2026-11-22T22:04:23+00:00"
 c input_file              = "source/artemis.toml"
 c sdef_direction          = "-z"
 c sdef_entry_position     = [0.0, 0.0, 137.0]

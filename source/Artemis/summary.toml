@@ -2,8 +2,9 @@
 
 [run]
 name                    = "Artemis"
-code_version            = "6113b4de3492cfcf55e46f62f4e5a9deee628722"
-created                 = "2026-11-20T21:08:56+00:00"
+code_version            = "3eaff23441959f6ed6bc281f2227dcb9692ae252"
+code_url                = "https://github.com/lucasjacobson/beam-target"
+created                 = "2026-11-22T22:04:23+00:00"
 input_file              = "source/artemis.toml"
 sdef_direction          = "-z"
 sdef_entry_position     = [0.0, 0.0, 137.0]
