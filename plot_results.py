@@ -13,7 +13,8 @@ and the neutron and photon flux maps of the mesh tallies, from MCNP, OpenMC, or 
 
 The plots go in images/, with the geometry plots: artemis_spectrum_<particle>.png, with every
 code given on the same axes, and artemis_<code>_<particle>_flux_<view>.png, for the pit and cavity
-views of the plot command files mcnp/plot_*. Reading MCNP results needs mcnptools (which comes
+views of the plot command files mcnp/plot_*. The neutron flux is also given in four energy groups
+(NEUTRON_GROUPS), in artemis_<code>_neutron_flux_<group>_<view>.png. Reading MCNP results needs mcnptools (which comes
 with MCNP), and reading OpenMC results needs the openmc Python package.
 
 Each flux figure has a panel for each plane of a view (xy and xz), all the same height, with a
@@ -37,6 +38,7 @@ import io
 import os
 import sys
 import time
+import warnings
 
 import matplotlib
 import numpy as np
@@ -64,15 +66,31 @@ MESH_TALLIES = {(particle, plane, view): 34 + 10 * ((k * len(VIEWS) + m) * len(P
                 for k, particle in enumerate(['neutron', 'photon'])
                 for m, view in enumerate(VIEWS) for n, plane in enumerate(PLANES)}
 
-# Flux figures: (particle, view, title, units, color scale (type, vmin, vmax; None for the
-# maximum), axis tick spacing [cm]). Log scales: the flux falls by orders of magnitude from the
-# source in the chamber to the cassettes (cavity views) and through the water (pit views)
+# Energy groups of the neutron mesh tallies (emesh in the MCNP deck, an energy filter in the
+# OpenMC model): name (in the file names) and title of each, in order of energy
+NEUTRON_GROUPS = [('thermal', 'below 0.5 eV'), ('epithermal', 'from 0.5 eV to 0.1 MeV'),
+                  ('fast', 'from 0.1 to 10 MeV'), ('high', 'above 10 MeV')]
+GROUP = {name: g for g, (name, _) in enumerate(NEUTRON_GROUPS)}
+
+# Flux figures: (particle, energy group (None for all energies), view, color scale (type, vmin,
+# vmax; None for the maximum), axis tick spacing [cm]). Log scales: the flux falls by orders of
+# magnitude from the source in the chamber to the cassettes (cavity views) and through the water
+# (pit views)
 FIGURES = [
-    ('neutron', 'pit'   , 'Neutron flux'           , 'n/cm$^2$-s'        , ('log', 1e6, None), 100),
-    ('neutron', 'cavity', 'Neutron flux (cavities)', 'n/cm$^2$-s'        , ('log', 1e8, None), 20),
-    ('photon' , 'pit'   , 'Photon flux'            , r'$\gamma$/cm$^2$-s', ('log', 1e6, None), 100),
-    ('photon' , 'cavity', 'Photon flux (cavities)' , r'$\gamma$/cm$^2$-s', ('log', 1e8, None), 20),
+    ('neutron', None        , 'pit'   , ('log', 1e6, None), 100),
+    ('neutron', None        , 'cavity', ('log', 1e8, None), 20),
+    ('neutron', 'thermal'   , 'pit'   , ('log', 1e6, None), 100),
+    ('neutron', 'thermal'   , 'cavity', ('log', 1e7, None), 20),
+    ('neutron', 'epithermal', 'pit'   , ('log', 1e6, None), 100),
+    ('neutron', 'epithermal', 'cavity', ('log', 1e7, None), 20),
+    ('neutron', 'fast'      , 'pit'   , ('log', 1e6, None), 100),
+    ('neutron', 'fast'      , 'cavity', ('log', 1e7, None), 20),
+    ('neutron', 'high'      , 'pit'   , ('log', 1e6, None), 100),
+    ('neutron', 'high'      , 'cavity', ('log', 1e7, None), 20),
+    ('photon' , None        , 'pit'   , ('log', 1e6, None), 100),
+    ('photon' , None        , 'cavity', ('log', 1e8, None), 20),
 ]
+UNITS = {'neutron': 'n/cm$^2$-s', 'photon': r'$\gamma$/cm$^2$-s'}
 
 # Contour line colors: the first N colors of CONTOUR_COLORS_2 (N = number of contour levels), in the
 # order they appear in CONTOUR_COLORS_1
@@ -109,13 +127,15 @@ class MCNPResults:
         return upper, flux[1:]
 
     def mesh(self, particle, plane, view):
-        """Return (extent, flux [/cm^2-s], rows along the vertical axis) of a mesh tally."""
+        """Return (edges along x, y, and z [cm], flux[x, y, z, energy group] [/cm^2-s]) of a mesh
+        tally."""
         t = self.meshtal.GetTally(MESH_TALLIES[particle, plane, view])
         edges = [np.array(t.GetXRBounds()), np.array(t.GetYZBounds()), np.array(t.GetZTBounds())]
-        shape = [len(e) - 1 for e in edges]
-        flux = np.array([[[t.GetValue(i, j, k, 0) for k in range(shape[2])]
-                          for j in range(shape[1])] for i in range(shape[0])])
-        return in_plane(edges, flux, plane)
+        shape = [len(e) - 1 for e in edges] + [len(t.GetEBounds()) - 1]
+        flux = np.array([[[[t.GetValue(i, j, k, e) for e in range(shape[3])]
+                           for k in range(shape[2])] for j in range(shape[1])]
+                         for i in range(shape[0])])
+        return edges, flux
 
 
 class OpenMCResults:
@@ -133,7 +153,11 @@ class OpenMCResults:
         # Cell volumes, from the model (the tallies hold track lengths, not fluxes)
         sys.path.insert(0, OPENMC_DIR)
         import artemis
-        cells = artemis.get_geometry(artemis.get_materials()).get_all_cells()
+        # The statepoint's summary has already made the model's materials, surfaces, and cells:
+        # making them again warns that their IDs are in use
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', openmc.IDWarning)
+            cells = artemis.get_geometry(artemis.get_materials()).get_all_cells()
         self.volumes = [cells[c].volume for c in CASSETTE_CELLS]
 
     def spectrum(self, particle):
@@ -145,7 +169,8 @@ class OpenMCResults:
         return edges, (track / np.array(self.volumes)[:, None]).mean(axis=0)
 
     def mesh(self, particle, plane, view):
-        """Return (extent, flux [/cm^2-s], rows along the vertical axis) of a mesh tally."""
+        """Return (edges along x, y, and z [cm], flux[x, y, z, energy group] [/cm^2-s]) of a mesh
+        tally."""
         import openmc
         t = self.statepoint.get_tally(id=MESH_TALLIES[particle, plane, view])
         mesh = t.find_filter(openmc.MeshFilter).mesh
@@ -154,14 +179,17 @@ class OpenMCResults:
                  for lo, hi, n in zip(mesh.lower_left, mesh.upper_right, mesh.dimension)]
         volume = np.prod((np.array(mesh.upper_right) - np.array(mesh.lower_left))
                          / np.array(mesh.dimension))
-        # Mesh bins run with x fastest, then y, then z
-        flux = t.mean.ravel().reshape(nz, ny, nx).transpose(2, 1, 0) / volume
-        return in_plane(edges, flux, plane)
+        # The filters are mesh, particle, and energy (if any), the last varying fastest; mesh bins
+        # run with x fastest, then y, then z
+        flux = t.mean.ravel().reshape(nz, ny, nx, -1).transpose(2, 1, 0, 3) / volume
+        return edges, flux
 
 
-def in_plane(edges, flux, plane):
-    """Reduce a mesh tally one bin thick across the plane (flux[x, y, z]) to the panel's extent
-    and its flux, with rows along the plane's vertical axis."""
+def in_plane(edges, flux, plane, group):
+    """Reduce a mesh tally one bin thick across the plane (flux[x, y, z, energy group]) to the
+    panel's extent and its flux in one energy group (the sum of them all for None), with rows along
+    the plane's vertical axis."""
+    flux = flux.sum(axis=3) if group is None else flux[:, :, :, GROUP[group]]
     h, v = 'xyz'.index(plane[0]), 'xyz'.index(plane[1])
     flux = np.take(flux, 0, axis=3 - h - v)
     return [edges[h][0], edges[h][-1], edges[v][0], edges[v][-1]], flux.T
@@ -194,8 +222,23 @@ def geometry_edges(plane, view, width=1):
 
 def plot_flux(results):
     """One figure per code and entry of FIGURES, with a panel for each plane."""
-    for particle, view, title, units, (scale, vmin, vmax), tick in FIGURES:
-        maps = {r.name: [r.mesh(particle, plane, view) for plane in PLANES] for r in results}
+    tallies = {}  # each mesh tally, read once
+    for particle, group, view, (scale, vmin, vmax), tick in FIGURES:
+        maps = {}
+        for r in results:
+            maps[r.name] = []
+            for plane in PLANES:
+                key = r.name, particle, plane, view
+                if key not in tallies:
+                    tallies[key] = r.mesh(particle, plane, view)
+                maps[r.name].append(in_plane(*tallies[key], plane, group))
+        title = f'{particle.capitalize()} flux'
+        if group is not None:
+            title += ' ' + dict(NEUTRON_GROUPS)[group]
+        if view == 'cavity':
+            title += ' (cavities)'
+        units = UNITS[particle]
+        suffix = view if group is None else f'{group}_{view}'
         top = max(np.max(flux) for panels in maps.values() for _, flux in panels)
         norm = (LogNorm if scale == 'log' else Normalize)(vmin, top if vmax is None else vmax)
         for name, panels in maps.items():
@@ -224,14 +267,15 @@ def plot_flux(results):
             levels = [x for x in cbar.get_ticks() if norm.vmin < x < norm.vmax]
             levels = levels[:len(CONTOUR_COLORS_2)]
             colors = contour_colors(len(levels))
-            for ax, (extent, flux) in zip(axs, panels):
+            for ax, (extent, flux) in zip(axs, panels if levels else []):
                 cs = ax.contour(flux, levels=levels, colors=colors, linewidths=0.8, origin='lower',
                                 extent=extent)
                 ax.clabel(cs, fontsize=6, fmt=lambda x: f'{x:.3g}'.replace('e+', 'e'))
-            cbar.add_lines(cs)
+            if levels:
+                cbar.add_lines(cs)
             fig.suptitle(f'Artemis: {title}, {name}')
             fig.get_layout_engine().set(h_pad=0.2, wspace=0)
-            save(fig, f'artemis_{name.lower()}_{particle}_flux_{view}.png', indexed=True)
+            save(fig, f'artemis_{name.lower()}_{particle}_flux_{suffix}.png', indexed=True)
 
 
 def plot_spectra(results):

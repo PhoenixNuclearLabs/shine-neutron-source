@@ -2,7 +2,7 @@ SHINE Artemis neutron generator, simplified model
 c
 c  Author:       Lucas Jacobson
 c  Created on:   November 20, 2026
-c  Last updated: November 21, 2026
+c  Last updated: November 22, 2026
 c
 c  Copyright 2026, SHINE Technologies. All rights reserved.
 c
@@ -366,6 +366,7 @@ c
               imesh  =  243.84  iints = 192
               jmesh  =  243.84  jints = 192
               kmesh  =   60.96  kints =   1
+              emesh  = 5e-7 0.1 10 1000
               factor = 1.77562e13
 c
   fc44        Neutron flux in the xz plane at y = 0 cm (as plot_xz_pit)
@@ -374,6 +375,7 @@ c
               imesh  =  243.84  iints = 192
               jmesh  =    5.08  jints =   1
               kmesh  =  299.72  kints = 192
+              emesh  = 5e-7 0.1 10 1000
               factor = 1.77562e13
 c
   fc54        Neutron flux in the xy plane at z = 55.88 cm (as plot_xy_cavity)
@@ -382,6 +384,7 @@ c
               imesh  =    76.2  iints = 120
               jmesh  =    76.2  jints = 120
               kmesh  =   60.96  kints =   1
+              emesh  = 5e-7 0.1 10 1000
               factor = 1.77562e13
 c
   fc64        Neutron flux in the xz plane at y = 0 cm (as plot_xz_cavity)
@@ -390,6 +393,7 @@ c
               imesh  =    76.2  iints = 120
               jmesh  =    5.08  jints =   1
               kmesh  =  132.08  kints = 120
+              emesh  = 5e-7 0.1 10 1000
               factor = 1.77562e13
 c
 c     Photons

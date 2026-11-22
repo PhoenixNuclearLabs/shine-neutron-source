@@ -498,6 +498,9 @@ def get_plots(mats):
 # the pit plots and half-inch bins for the cavity plots
 MESH_DEPTH = 4 * 2.54
 MESH_BINS = {'pit': 2.54, 'cavity': 1.27}
+# Energy groups of the neutron mesh tallies [eV]: below 0.5 eV, 0.5 eV to 0.1 MeV, 0.1 to 10 MeV,
+# and above 10 MeV (up to the top of the cassette spectrum's bins), as emesh in the MCNP deck
+NEUTRON_GROUPS = [0.0, 0.5, 1e5, 1e7, 1e9]
 
 
 def get_tallies(geom):
@@ -507,6 +510,7 @@ def get_tallies(geom):
     # One filter per particle, shared by the tallies (OpenMC merges equal filters when it writes
     # them, and warns about it)
     only = {p: openmc.ParticleFilter(p) for p in ['neutron', 'photon']}
+    groups = openmc.EnergyFilter(NEUTRON_GROUPS)
     tallies = []
 
     t = openmc.Tally(14, name='Neutron energy spectrum in the cassette regions (CCFE-709)')
@@ -537,6 +541,8 @@ def get_tallies(geom):
             t = openmc.Tally(number, name=f'{particle.capitalize()} flux in the {plane} plane '
                                           f'(as plot_{plane}_{view})')
             t.filters = [openmc.MeshFilter(mesh), only[particle]]
+            if particle == 'neutron':
+                t.filters.append(groups)
             t.scores = ['flux']
             tallies.append(t)
             number += 10
