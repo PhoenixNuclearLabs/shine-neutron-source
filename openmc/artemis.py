@@ -15,11 +15,11 @@
 # Differences from the MCNP model:
 # - There is no cell for the void outside the model (MCNP cell 999): the outer surfaces of the
 #   model are vacuum boundaries instead.
-# - Tallies are per source particle: multiply them by the total neutron yield (yield_total in
-#   ../source/Artemis/source.h5, which a run prints) for absolute rates. Flux tallies are not
-#   divided by volume: divide the cassette tallies by the volume of cells 106 and 206 (the volume
-#   of each cell MCNP needs a vol= for is set on the cell) and the mesh tallies by the volume of a
-#   mesh element.
+# - Tallies are already absolute rates: OpenMC scales them by the total strength of the sources,
+#   which beam-target gives in n/s (their sum is the total neutron yield), as the MCNP model does
+#   with its fm cards. But flux tallies are not divided by volume: divide the cassette tallies by
+#   the volume of cells 106 and 206 (the volume of each cell MCNP needs a vol= for is set on the
+#   cell) and the mesh tallies by the volume of a mesh element.
 #
 # The neutron source comes from ../source/Artemis/source.h5, made by beam-target
 # (https://github.com/lucasjacobson/beam-target), which must be installed to run this script. The
@@ -177,12 +177,6 @@ def check_source(fname_h5):
         radius = float(hf['inputs']['wall_radius'][0])
         assert np.isclose(radius, R_BORE), f'{fname_h5} has wall_radius {radius} cm'
         assert np.allclose(hf.attrs['backstop_position'], 0.0)
-
-
-def source_yield(fname_h5):
-    """Return the total neutron yield [n/s] of the source, which the tallies are scaled by."""
-    with h5py.File(fname_h5, 'r') as hf:
-        return float(hf['results']['yield_total'][()])
 
 
 def get_materials():
@@ -604,7 +598,6 @@ def main():
     # Keep only the final statepoint
     for f in statepoints()[:-1]:
         os.remove(f)
-    print(f'Tallies are per source particle: multiply them by {source_yield(SOURCE_H5):.6e} n/s.')
 
 
 if __name__ == '__main__': main()
