@@ -453,7 +453,7 @@ def prism_volume(region, surfaces):
 # ------------------------------------------------------------------------------
 # Geometry plots and mesh tallies, following the MCNP plot command files ../mcnp/plot_<plane>_<view>
 # ------------------------------------------------------------------------------
-PLOTS = [(plane, view) for view in ['pit', 'cavity'] for plane in ['xy', 'xz', 'yz']]
+PLOTS = [(plane, view) for view in ['pit', 'cavity'] for plane in ['xy', 'xz']]
 
 
 @functools.cache

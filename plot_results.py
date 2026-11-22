@@ -16,7 +16,7 @@ code given on the same axes, and artemis_<code>_<particle>_flux_<view>.png, for 
 views of the plot command files mcnp/plot_*. Reading MCNP results needs mcnptools (which comes
 with MCNP), and reading OpenMC results needs the openmc Python package.
 
-Each flux figure has a panel for each plane of a view (xy, xz, and yz), all the same height, with a
+Each flux figure has a panel for each plane of a view (xy and xz), all the same height, with a
 shared color scale (FIGURES), the same for every code given: a vmax of None is the largest value
 in the panels. Anything below vmin is shown in the vmin color instead of being left blank. There
 is a contour line at each colorbar tick, labeled with its value and drawn on the colorbar too.
@@ -58,9 +58,9 @@ CASSETTE_CELLS = [106, 206]
 SPECTRUM_TALLIES = {'neutron': 14, 'photon': 24}
 
 # Mesh tallies: one for each plane and view, neutrons then photons
-PLANES = ['xy', 'xz', 'yz']
+PLANES = ['xy', 'xz']
 VIEWS = ['pit', 'cavity']
-MESH_TALLIES = {(particle, plane, view): 34 + 10 * (6 * k + 3 * m + n)
+MESH_TALLIES = {(particle, plane, view): 34 + 10 * ((k * len(VIEWS) + m) * len(PLANES) + n)
                 for k, particle in enumerate(['neutron', 'photon'])
                 for m, view in enumerate(VIEWS) for n, plane in enumerate(PLANES)}
 

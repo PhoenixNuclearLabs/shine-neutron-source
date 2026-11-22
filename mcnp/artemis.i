@@ -20,9 +20,9 @@ c  top of the 137 cm source region. The ground is at z = 289.56 cm.
 c  Tallies are scaled by the total neutron yield (yield_total in
 c  ../source/Artemis/summary.toml).
 c
-c  Geometry plots: mcnp6 ip i=artemis.i com=plot_xy_pit (or plot_xz_pit,
-c  plot_yz_pit, and the zoomed plot_xy_cavity, plot_xz_cavity, and
-c  plot_yz_cavity). The mesh tallies cover the same windows as the _pit plots.
+c  Geometry plots: mcnp6 ip i=artemis.i com=plot_xy_pit (or plot_xz_pit, or
+c  the zoomed plot_xy_cavity and plot_xz_cavity). The mesh tallies cover the
+c  same windows as these plots.
 c
 c ******************************************************************************
 c
@@ -376,85 +376,53 @@ c
               kmesh  =  299.72  kints = 192
               factor = 1.77562e13
 c
-  fc54        Neutron flux in the yz plane at x = 0 cm (as plot_yz_pit)
+  fc54        Neutron flux in the xy plane at z = 55.88 cm (as plot_xy_cavity)
   fmesh54:n   geom   = xyz
-              origin = -5.08 -243.84 -187.96
-              imesh  =    5.08  iints =   1
-              jmesh  =  243.84  jints = 192
-              kmesh  =  299.72  kints = 192
-              factor = 1.77562e13
-c
-  fc64        Neutron flux in the xy plane at z = 55.88 cm (as plot_xy_cavity)
-  fmesh64:n   geom   = xyz
               origin = -76.2 -76.2 50.8
               imesh  =    76.2  iints = 120
               jmesh  =    76.2  jints = 120
               kmesh  =   60.96  kints =   1
               factor = 1.77562e13
 c
-  fc74        Neutron flux in the xz plane at y = 0 cm (as plot_xz_cavity)
-  fmesh74:n   geom   = xyz
+  fc64        Neutron flux in the xz plane at y = 0 cm (as plot_xz_cavity)
+  fmesh64:n   geom   = xyz
               origin = -76.2 -5.08 -20.32
               imesh  =    76.2  iints = 120
               jmesh  =    5.08  jints =   1
               kmesh  =  132.08  kints = 120
               factor = 1.77562e13
 c
-  fc84        Neutron flux in the yz plane at x = 0 cm (as plot_yz_cavity)
-  fmesh84:n   geom   = xyz
-              origin = -5.08 -76.2 -20.32
-              imesh  =    5.08  iints =   1
-              jmesh  =    76.2  jints = 120
-              kmesh  =  132.08  kints = 120
-              factor = 1.77562e13
-c
 c     Photons
 c
-  fc94        Photon flux in the xy plane at z = 55.88 cm (as plot_xy_pit)
-  fmesh94:p   geom   = xyz
+  fc74        Photon flux in the xy plane at z = 55.88 cm (as plot_xy_pit)
+  fmesh74:p   geom   = xyz
               origin = -243.84 -243.84 50.8
               imesh  =  243.84  iints = 192
               jmesh  =  243.84  jints = 192
               kmesh  =   60.96  kints =   1
               factor = 1.77562e13
 c
-  fc104       Photon flux in the xz plane at y = 0 cm (as plot_xz_pit)
-  fmesh104:p  geom   = xyz
+  fc84        Photon flux in the xz plane at y = 0 cm (as plot_xz_pit)
+  fmesh84:p   geom   = xyz
               origin = -243.84 -5.08 -187.96
               imesh  =  243.84  iints = 192
               jmesh  =    5.08  jints =   1
               kmesh  =  299.72  kints = 192
               factor = 1.77562e13
 c
-  fc114       Photon flux in the yz plane at x = 0 cm (as plot_yz_pit)
-  fmesh114:p  geom   = xyz
-              origin = -5.08 -243.84 -187.96
-              imesh  =    5.08  iints =   1
-              jmesh  =  243.84  jints = 192
-              kmesh  =  299.72  kints = 192
-              factor = 1.77562e13
-c
-  fc124       Photon flux in the xy plane at z = 55.88 cm (as plot_xy_cavity)
-  fmesh124:p  geom   = xyz
+  fc94        Photon flux in the xy plane at z = 55.88 cm (as plot_xy_cavity)
+  fmesh94:p   geom   = xyz
               origin = -76.2 -76.2 50.8
               imesh  =    76.2  iints = 120
               jmesh  =    76.2  jints = 120
               kmesh  =   60.96  kints =   1
               factor = 1.77562e13
 c
-  fc134       Photon flux in the xz plane at y = 0 cm (as plot_xz_cavity)
-  fmesh134:p  geom   = xyz
+  fc104       Photon flux in the xz plane at y = 0 cm (as plot_xz_cavity)
+  fmesh104:p  geom   = xyz
               origin = -76.2 -5.08 -20.32
               imesh  =    76.2  iints = 120
               jmesh  =    5.08  jints =   1
-              kmesh  =  132.08  kints = 120
-              factor = 1.77562e13
-c
-  fc144       Photon flux in the yz plane at x = 0 cm (as plot_yz_cavity)
-  fmesh144:p  geom   = xyz
-              origin = -5.08 -76.2 -20.32
-              imesh  =    5.08  iints =   1
-              jmesh  =    76.2  jints = 120
               kmesh  =  132.08  kints = 120
               factor = 1.77562e13
 c
