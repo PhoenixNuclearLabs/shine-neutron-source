@@ -558,6 +558,9 @@ def get_settings(sources):
     settings.statepoint       = {'batches': list(range(1, settings.batches + 1))}
     settings.sourcepoint      = {'write': True}
 
+    # The tallies are in the statepoints: no tallies.out
+    settings.output           = {'tallies': False}
+
     return settings
 
 

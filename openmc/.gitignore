@@ -1,6 +1,5 @@
 /statepoint*.h5
 /summary.h5
-/tallies.out
 /*.xml
 /run.log
 /__pycache__/
