@@ -92,12 +92,23 @@ FIGURES = [
 ]
 UNITS = {'neutron': 'n/cm$^2$-s', 'photon': r'$\gamma$/cm$^2$-s'}
 
+# Contour levels on log scales, in each decade: 1 and 3 for the whole-geometry (pit) views, and 1, 2,
+# and 5 for the closer cavity views (linear scales have them at the colorbar ticks)
+CONTOUR_STEPS = {'pit': [1, 3], 'cavity': [1, 2, 5]}
+
 # Contour line colors: the first N colors of CONTOUR_COLORS_2 (N = number of contour levels), in the
 # order they appear in CONTOUR_COLORS_1
 CONTOUR_COLORS_1 = ['w', 'gold', 'r', 'b', 'g', 'm', 'c', 'darkred', 'darkblue', 'darkgreen',
                     'purple', 'darkcyan', 'dodgerblue', 'yellow', 'lime', 'aqua', 'ivory']
 CONTOUR_COLORS_2 = ['r', 'b', 'g', 'yellow', 'w', 'm', 'darkblue', 'aqua', 'gold', 'darkred', 'c',
                     'darkgreen', 'purple', 'lime', 'darkcyan', 'ivory', 'dodgerblue']
+
+
+def power_of_ten(x):
+    """A contour label in the colorbar's style: 2×10⁸ (10⁹ for 1×10⁹), in mathtext."""
+    mantissa, exponent = f'{x:.2e}'.split('e')
+    mantissa, exponent = f'{float(mantissa):g}', int(exponent)
+    return f'$10^{{{exponent}}}$' if mantissa == '1' else f'${mantissa}\\times10^{{{exponent}}}$'
 
 
 def contour_colors(n):
@@ -261,16 +272,22 @@ def plot_flux(results):
                 ax.yaxis.set_major_locator(MultipleLocator(tick))
             cbar = fig.colorbar(im, ax=axs, label=units, shrink=0.8, pad=0.01)
 
-            # Contour lines at the colorbar ticks (not including the ends of the scale), one
-            # color per tick, the same in every panel, drawn on the colorbar too, and labeled
-            # with their values
-            levels = [x for x in cbar.get_ticks() if norm.vmin < x < norm.vmax]
+            # Contour lines at CONTOUR_STEPS (not including the ends of the scale), one color per
+            # level, the same in every panel, drawn on the colorbar too, and labeled with their
+            # values
+            if scale == 'log':
+                decades = range(int(np.floor(np.log10(norm.vmin))),
+                                int(np.ceil(np.log10(norm.vmax))) + 1)
+                levels = [step * 10.0**d for d in decades for step in CONTOUR_STEPS[view]]
+            else:
+                levels = cbar.get_ticks()
+            levels = [x for x in levels if norm.vmin < x < norm.vmax]
             levels = levels[:len(CONTOUR_COLORS_2)]
             colors = contour_colors(len(levels))
             for ax, (extent, flux) in zip(axs, panels if levels else []):
                 cs = ax.contour(flux, levels=levels, colors=colors, linewidths=0.8, origin='lower',
                                 extent=extent)
-                ax.clabel(cs, fontsize=6, fmt=lambda x: f'{x:.3g}'.replace('e+', 'e'))
+                ax.clabel(cs, fontsize=6, fmt=power_of_ten)
             if levels:
                 cbar.add_lines(cs)
             fig.suptitle(f'Artemis: {title}, {name}')
