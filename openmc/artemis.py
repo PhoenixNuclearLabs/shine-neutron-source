@@ -504,16 +504,19 @@ def get_tallies(geom):
 
     cells = geom.get_all_cells()
     cassettes = openmc.CellFilter([cells[106], cells[206]])
+    # One filter per particle, shared by the tallies (OpenMC merges equal filters when it writes
+    # them, and warns about it)
+    only = {p: openmc.ParticleFilter(p) for p in ['neutron', 'photon']}
     tallies = []
 
     t = openmc.Tally(14, name='Neutron energy spectrum in the cassette regions (CCFE-709)')
-    t.filters = [cassettes, openmc.ParticleFilter('neutron'),
+    t.filters = [cassettes, only['neutron'],
                  openmc.EnergyFilter.from_group_structure('CCFE-709')]
     t.scores = ['flux']
     tallies.append(t)
 
     t = openmc.Tally(24, name='Photon energy spectrum in the cassette regions (VITAMIN-J-42)')
-    t.filters = [cassettes, openmc.ParticleFilter('photon'),
+    t.filters = [cassettes, only['photon'],
                  openmc.EnergyFilter.from_group_structure('VITAMIN-J-42')]
     t.scores = ['flux']
     tallies.append(t)
@@ -533,7 +536,7 @@ def get_tallies(geom):
             mesh.lower_left, mesh.upper_right, mesh.dimension = lower, upper, dims
             t = openmc.Tally(number, name=f'{particle.capitalize()} flux in the {plane} plane '
                                           f'(as plot_{plane}_{view})')
-            t.filters = [openmc.MeshFilter(mesh), openmc.ParticleFilter(particle)]
+            t.filters = [openmc.MeshFilter(mesh), only[particle]]
             t.scores = ['flux']
             tallies.append(t)
             number += 10
@@ -586,14 +589,16 @@ def main():
     if args.plot:
         model.plot_geometry(cwd=HERE)
         return
-    model.export_to_model_xml(os.path.join(HERE, 'model.xml'))
     if args.inputs:
+        model.export_to_model_xml(os.path.join(HERE, 'model.xml'))
         return
 
-    restart = statepoints()[-1] if args.restart else None
-    if args.restart and restart is None:
-        raise SystemExit('No statepoint to restart from')
-    model.run(cwd=HERE, threads=args.threads, restart_file=restart, export_model_xml=False)
+    restart = None
+    if args.restart:
+        if not statepoints():
+            raise SystemExit('No statepoint to restart from')
+        restart = statepoints()[-1]
+    model.run(cwd=HERE, threads=args.threads, restart_file=restart)  # writes model.xml first
 
     # Keep only the final statepoint
     for f in statepoints()[:-1]:
