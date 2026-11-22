@@ -16,20 +16,33 @@
 # - There is no cell for the void outside the model (MCNP cell 999): the outer surfaces of the
 #   model are vacuum boundaries instead.
 # - Tallies are per source particle: multiply them by the total neutron yield (yield_total in
-#   ../source/Artemis/summary.toml) for absolute rates. Flux tallies are not divided by volume:
-#   divide the cassette tallies by CASSETTE_VOLUME and the mesh tallies by the volume of a mesh
-#   element.
+#   ../source/Artemis/source.h5, which a run prints) for absolute rates. Flux tallies are not
+#   divided by volume: divide the cassette tallies by the volume of cells 106 and 206 (the volume
+#   of each cell MCNP needs a vol= for is set on the cell) and the mesh tallies by the volume of a
+#   mesh element.
 #
 # The neutron source comes from ../source/Artemis/source.h5, made by beam-target
 # (https://github.com/lucasjacobson/beam-target), which must be installed to run this script. The
 # geometry plots and mesh tallies follow the MCNP plot command files ../mcnp/plot_*. Set
 # OPENMC_CROSS_SECTIONS to the cross_sections.xml of an ENDF/B-VIII.1 library, the data the MCNP
 # model uses.
+#
+# Run it from anywhere; OpenMC's files (model.xml, statepoints, ...) go in this folder:
+#   python artemis.py               write model.xml and run (a statepoint after every batch)
+#   python artemis.py --restart     continue the run from its latest statepoint
+#   python artemis.py --plot        make the geometry plots (../images/artemis_openmc_geom_*.png)
+#   python artemis.py --inputs      only write model.xml
+# Add --threads N to use N threads (default: all).
 
+import argparse
+import functools
+import glob
 import math
 import os
+import re
 
 import h5py
+import matplotlib.colors
 import numpy as np
 import openmc
 from beamtarget.openmc_source import get_openmc_sources
@@ -82,14 +95,6 @@ EARTH_T = 3 * 30.48                      # earth: 3 ft thick beside and below th
 XE, YE = XW + EARTH_T, YW + EARTH_T      # floor and earth
 Z_SLAB, Z_GAP, Z_LINER, Z_PIT, Z_FLOOR = -208.28, -177.8, -167.64, -167.2971, 269.24
 Z_EARTH = round(Z_SLAB - EARTH_T, 5)
-
-# Volume of a cassette region (cells 106 and 206): the box minus the part of it inside the cavity
-# wall cylinder around the chamber, a circular segment beyond x = XC1
-CASSETTE_VOLUME = ((XCS - XC1) * 2 * YCS
-                   - (R_CAV_WALL ** 2 * math.acos(XC1 / R_CAV_WALL)
-                      - XC1 * math.sqrt(R_CAV_WALL ** 2 - XC1 ** 2))) * (Z_CAS1 - Z_CAS0)
-
-YIELD_TOTAL = 1.77562e13                 # n/s, yield_total in ../source/Artemis/summary.toml
 
 # ------------------------------------------------------------------------------
 # Materials from the PNNL compendium of material compositions (PNNL-15870), as in the MCNP model:
@@ -174,6 +179,12 @@ def check_source(fname_h5):
         assert np.allclose(hf.attrs['backstop_position'], 0.0)
 
 
+def source_yield(fname_h5):
+    """Return the total neutron yield [n/s] of the source, which the tallies are scaled by."""
+    with h5py.File(fname_h5, 'r') as hf:
+        return float(hf['results']['yield_total'][()])
+
+
 def get_materials():
     """Materials by MCNP material number."""
     mats = {}
@@ -196,13 +207,13 @@ def get_surfaces():
     x_planes = [XC1, XCS, XCI, XCO, XVO0, XVI0, XVI1, XVO1, XP, XL, XA, XW, XE]
     y_planes = [YCS, YDI, YDO, YCI, YCO, YP, YL, YA, YW, YE]
     groups = [
-        ('cz', 101, [R_BEAM_IN, R_BEAM_OUT, R_BORE, R_WALL_1, R_WATER, R_WALL_2, R_GAP, R_CAV_WALL,
-                     R_UP_IN, R_UP_OUT]),
+        ('cz', 101, [R_BEAM_IN, R_BEAM_OUT, R_BORE, R_WALL_1, R_WATER, R_WALL_2, R_GAP,
+                     R_CAV_WALL, R_UP_IN, R_UP_OUT]),
         ('px', 201, [XC0] + x_planes + [-v for v in x_planes]),
         ('py', 301, y_planes + [-v for v in y_planes]),
-        ('pz', 401, [Z_EARTH, Z_SLAB, Z_GAP, Z_LINER, Z_PIT, Z_CAV0, Z_END, Z_AIR0, Z_END_TOP, Z_PLATE,
-                     Z_STOP, 0.0, Z_HD0_OUT, Z_HD0, Z_CAS0, Z_CAS1, Z_AIR1, Z_CAV1, Z_WALLS, Z_UP0,
-                     Z_UP1, Z_UP2, Z_FLOOR, GROUND, Z_ROOF]),
+        ('pz', 401, [Z_EARTH, Z_SLAB, Z_GAP, Z_LINER, Z_PIT, Z_CAV0, Z_END, Z_AIR0, Z_END_TOP,
+                     Z_PLATE, Z_STOP, 0.0, Z_HD0_OUT, Z_HD0, Z_CAS0, Z_CAS1, Z_AIR1, Z_CAV1,
+                     Z_WALLS, Z_UP0, Z_UP1, Z_UP2, Z_FLOOR, GROUND, Z_ROOF]),
     ]
     make = {'cz': lambda n, v: openmc.ZCylinder(surface_id=n, r=v),
             'px': lambda n, v: openmc.XPlane(surface_id=n, x0=v),
@@ -216,6 +227,30 @@ def get_surfaces():
     for key in [('px', -XE), ('px', XE), ('py', -YE), ('py', YE), ('pz', Z_EARTH), ('pz', Z_ROOF)]:
         surfaces[key].boundary_type = 'vacuum'
     return surfaces
+
+
+# Material numbers (None: void)
+VOID, CU, SS, H2O, AIR, AL, CONC, EARTH = None, 112, 331, 392, 4, 13, 108, 116
+
+# Target chamber and upstream section: cylindrical shells (inside r1 only, if r0 is None)
+CHAMBER_CELLS = [
+    ( 1, VOID, None,       R_BORE,     0.0,       Z_UP0,     'Vacuum in target chamber'),
+    ( 2, CU,   None,       R_BORE,     Z_STOP,    0.0,       'Copper beam stop'),
+    ( 3, SS,   None,       R_WALL_1,   Z_PLATE,   Z_STOP,    'Steel plate below beam stop'),
+    ( 4, SS,   R_BORE,     R_WALL_1,   Z_STOP,    Z_WALLS,   'Target chamber inner wall'),
+    ( 5, H2O,  R_WALL_1,   R_WATER,    Z_PLATE,   Z_WALLS,   'Cooling water jacket'),
+    ( 6, H2O,  None,       R_WATER,    Z_END_TOP, Z_PLATE,   'Cooling water behind beam stop'),
+    ( 7, SS,   R_WATER,    R_WALL_2,   Z_END_TOP, Z_WALLS,   'Target chamber outer wall'),
+    ( 8, SS,   None,       R_WALL_2,   Z_END,     Z_END_TOP, 'Target chamber end plate'),
+    ( 9, SS,   R_BORE,     R_UP_OUT,   Z_WALLS,   Z_UP0,     'Upstream tube bottom plate'),
+    (10, VOID, None,       R_UP_IN,    Z_UP0,     Z_UP1,     'Vacuum in upstream tube'),
+    (11, SS,   R_UP_IN,    R_UP_OUT,   Z_UP0,     Z_UP1,     'Upstream tube'),
+    (12, SS,   R_BEAM_OUT, R_UP_OUT,   Z_UP1,     Z_UP2,     'Upstream tube top plate'),
+    (13, VOID, None,       R_BEAM_IN,  Z_UP1,     GROUND,    'Vacuum in beam tube'),
+    (14, SS,   R_BEAM_IN,  R_BEAM_OUT, Z_UP1,     GROUND,    'Beam tube'),
+    (15, H2O,  R_WALL_2,   R_GAP,      Z_END,     Z_CAV1,    'Water between chamber and cavities'),
+    (16, H2O,  None,       R_GAP,      Z_CAV0,    Z_END,     'Water below chamber, in cavities'),
+]
 
 
 # ------------------------------------------------------------------------------
@@ -239,25 +274,9 @@ def get_geometry(mats):
         fill = None if mat is None else mats[mat]
         cells.append(openmc.Cell(cell_id=number, name=name, fill=fill, region=region))
 
-    VOID, CU, SS, H2O, AIR, AL, CONC, EARTH = None, 112, 331, 392, 4, 13, 108, 116
-
     # Target chamber and upstream section
-    cell( 1, VOID, tube(None,       R_BORE,     0.0,       Z_UP0),     'Vacuum in target chamber')
-    cell( 2, CU,   tube(None,       R_BORE,     Z_STOP,    0.0),       'Copper beam stop')
-    cell( 3, SS,   tube(None,       R_WALL_1,   Z_PLATE,   Z_STOP),    'Steel plate below beam stop')
-    cell( 4, SS,   tube(R_BORE,     R_WALL_1,   Z_STOP,    Z_WALLS),   'Target chamber inner wall')
-    cell( 5, H2O,  tube(R_WALL_1,   R_WATER,    Z_PLATE,   Z_WALLS),   'Cooling water jacket')
-    cell( 6, H2O,  tube(None,       R_WATER,    Z_END_TOP, Z_PLATE),   'Cooling water behind beam stop')
-    cell( 7, SS,   tube(R_WATER,    R_WALL_2,   Z_END_TOP, Z_WALLS),   'Target chamber outer wall')
-    cell( 8, SS,   tube(None,       R_WALL_2,   Z_END,     Z_END_TOP), 'Target chamber end plate')
-    cell( 9, SS,   tube(R_BORE,     R_UP_OUT,   Z_WALLS,   Z_UP0),     'Upstream tube bottom plate')
-    cell(10, VOID, tube(None,       R_UP_IN,    Z_UP0,     Z_UP1),     'Vacuum in upstream tube')
-    cell(11, SS,   tube(R_UP_IN,    R_UP_OUT,   Z_UP0,     Z_UP1),     'Upstream tube')
-    cell(12, SS,   tube(R_BEAM_OUT, R_UP_OUT,   Z_UP1,     Z_UP2),     'Upstream tube top plate')
-    cell(13, VOID, tube(None,       R_BEAM_IN,  Z_UP1,     GROUND),    'Vacuum in beam tube')
-    cell(14, SS,   tube(R_BEAM_IN,  R_BEAM_OUT, Z_UP1,     GROUND),    'Beam tube')
-    cell(15, H2O,  tube(R_WALL_2,   R_GAP,      Z_END,     Z_CAV1),    'Water between chamber and cavities')
-    cell(16, H2O,  tube(None,       R_GAP,      Z_CAV0,    Z_END),     'Water below chamber, in cavities')
+    for number, mat, r0, r1, z0, z1, name in CHAMBER_CELLS:
+        cell(number, mat, tube(r0, r1, z0, z1), name)
 
     # Irradiation cavities, cassette regions, and ducts, with their walls split into slabs: boxes
     # given for the +x side and mirrored for the -x side
@@ -275,8 +294,10 @@ def get_geometry(mats):
         cl( 1, AIR, b(XCS, XCI, -YCI, YCI, Z_AIR0, Z_AIR1), 'Air in cavity, beyond cassette')
         cl( 2, AIR, b(XC1, XCS, YCS, YCI, Z_AIR0, Z_AIR1), 'Air in cavity, +y of cassette')
         cl( 3, AIR, b(XC1, XCS, -YCI, -YCS, Z_AIR0, Z_AIR1), 'Air in cavity, -y of cassette')
-        cl( 4, AIR, b(XC1, XCS, -YCS, YCS, Z_AIR0, Z_CAS0) & out_wall, 'Air in cavity, below cassette')
-        cl( 5, AIR, b(XC1, XCS, -YCS, YCS, Z_CAS1, Z_AIR1) & out_wall, 'Air in cavity, above cassette')
+        cl( 4, AIR, b(XC1, XCS, -YCS, YCS, Z_AIR0, Z_CAS0) & out_wall,
+            'Air in cavity, below cassette')
+        cl( 5, AIR, b(XC1, XCS, -YCS, YCS, Z_CAS1, Z_AIR1) & out_wall,
+            'Air in cavity, above cassette')
         cl( 6, AIR, b(XC1, XCS, -YCS, YCS, Z_CAS0, Z_CAS1) & out_wall, 'Cassette region')
         cl( 7, AL,  b(XC0, XCO, -YCO, YCO, Z_CAV0, Z_AIR0) & out_gap, 'Cavity bottom')
         cl( 8, AL,  b(XC0, XCO, -YCO, YCO, Z_AIR1, Z_CAV1) & out_gap, 'Cavity top')
@@ -320,9 +341,12 @@ def get_geometry(mats):
         (box(XCO, XVO0, -YCO, -YDO, Z_CAV0, Z_CAV1), 'Water, -y of horizontal duct (+x)'),
         (box(XCO, XVO0, YDO, YCO, Z_CAV0, Z_CAV1), 'Water, +y of horizontal duct (+x)'),
         (box(XCO, XVO0, -YDO, YDO, Z_CAV0, Z_HD0_OUT), 'Water below horizontal duct (+x)'),
-        (box(-XVO0, XVO0, -YCO, YCO, Z_CAV1, Z_WALLS) & +S['cz', R_WALL_2], 'Water around target chamber'),
-        (box(-XVO0, XVO0, -YCO, YCO, Z_WALLS, Z_UP2) & +S['cz', R_UP_OUT], 'Water around upstream tube'),
-        (box(-XVO0, XVO0, -YCO, YCO, Z_UP2, GROUND) & +S['cz', R_BEAM_OUT], 'Water around beam tube'),
+        (box(-XVO0, XVO0, -YCO, YCO, Z_CAV1, Z_WALLS) & +S['cz', R_WALL_2],
+         'Water around target chamber'),
+        (box(-XVO0, XVO0, -YCO, YCO, Z_WALLS, Z_UP2) & +S['cz', R_UP_OUT],
+         'Water around upstream tube'),
+        (box(-XVO0, XVO0, -YCO, YCO, Z_UP2, GROUND) & +S['cz', R_BEAM_OUT],
+         'Water around beam tube'),
     ]
     for n, (region, name) in enumerate(water, start=301):
         cell(n, H2O, region, name)
@@ -360,11 +384,76 @@ def get_geometry(mats):
     # Air above ground
     cell(701, AIR, box(-XE, XE, -YE, YE, GROUND, Z_ROOF), 'Air above ground')
 
+    # The volume of each cell MCNP needs a vol= for, as in the MCNP model
+    by_id = {surface.id: surface for surface in S.values()}
     for c in cells:
-        if c.id in (106, 206):
-            c.volume = CASSETTE_VOLUME
+        volume = prism_volume(c.region, by_id)
+        if volume is not None:
+            c.volume = volume
 
     return openmc.Geometry(openmc.Universe(cells=cells))
+
+
+# ------------------------------------------------------------------------------
+# Volumes of the cells bounded by both planes normal to x or y and cylinders along z, which MCNP
+# can't calculate (they are neither polyhedra nor symmetric about one axis). Each is a prism along
+# z, so its volume is its cross-section (a rectangle, inside one cylinder and/or outside another)
+# times its height. The cross-section is the integral over x of the chord length in y, in closed
+# form piece by piece.
+# ------------------------------------------------------------------------------
+def disk_rect_area(r, x0, x1, y0, y1):
+    """Area of the rectangle [x0, x1] x [y0, y1] inside the disk of radius r about the origin."""
+    x0, x1 = max(x0, -r), min(x1, r)
+    if x1 <= x0:
+        return 0.0
+    cuts = {x0, x1}
+    for yy in (y0, y1):
+        if abs(yy) < r:
+            w = math.sqrt(r * r - yy * yy)
+            cuts |= {-w, w}
+    xs = sorted(c for c in cuts if x0 <= c <= x1)
+
+    def chord(t):  # integral of sqrt(r^2 - x^2) from 0 to t
+        t = max(-r, min(r, t))
+        return 0.5 * (t * math.sqrt(r * r - t * t) + r * r * math.asin(t / r))
+
+    area = 0.0
+    for a, b in zip(xs, xs[1:]):
+        m = 0.5 * (a + b)
+        h = math.sqrt(r * r - m * m)
+        top = chord(b) - chord(a) if h < y1 else y1 * (b - a)
+        bottom = -(chord(b) - chord(a)) if -h > y0 else y0 * (b - a)
+        if min(h, y1) > max(-h, y0):
+            area += top - bottom
+    return area
+
+
+def prism_volume(region, surfaces):
+    """Volume of a cell bounded by planes normal to x or y and cylinders along z (and planes
+    normal to z), or None for any other cell."""
+    lo = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
+    hi = {'x': math.inf, 'y': math.inf, 'z': math.inf}
+    inside, outside = [], []
+    for token in re.findall(r'-?\d+', str(region)):
+        surface, negative = surfaces[abs(int(token))], token.startswith('-')
+        if isinstance(surface, openmc.ZCylinder):
+            (inside if negative else outside).append(surface.r)
+        else:
+            axis = {openmc.XPlane: 'x', openmc.YPlane: 'y', openmc.ZPlane: 'z'}[type(surface)]
+            value = {'x': 'x0', 'y': 'y0', 'z': 'z0'}[axis]
+            if negative:
+                hi[axis] = min(hi[axis], getattr(surface, value))
+            else:
+                lo[axis] = max(lo[axis], getattr(surface, value))
+    if not (inside or outside) or all(math.isinf(lo[a]) and math.isinf(hi[a]) for a in 'xy'):
+        return None
+    big = 1e6
+    x0, x1 = max(lo['x'], -big), min(hi['x'], big)
+    y0, y1 = max(lo['y'], -big), min(hi['y'], big)
+    area = disk_rect_area(inside[0], x0, x1, y0, y1) if inside else (x1 - x0) * (y1 - y0)
+    if outside:
+        area -= disk_rect_area(outside[0], x0, x1, y0, y1)
+    return area * (hi['z'] - lo['z'])
 
 
 # ------------------------------------------------------------------------------
@@ -372,12 +461,8 @@ def get_geometry(mats):
 # ------------------------------------------------------------------------------
 PLOTS = [(plane, view) for view in ['pit', 'cavity'] for plane in ['xy', 'xz', 'yz']]
 
-# MCNP plot colors (X11 names) as RGB
-X11_COLORS = {'lightblue': (173, 216, 230), 'cadetblue': (95, 158, 160), 'slategray': (112, 128, 144),
-              'deeppink': (255, 20, 147), 'sienna': (160, 82, 45), 'darkorchid': (153, 50, 204),
-              'dodgerblue': (30, 144, 255)}
 
-
+@functools.cache
 def read_plot(plane, view):
     """Return (origin, extent, {material number: color}) of an MCNP plot command file (its last
     origin and extent)."""
@@ -394,6 +479,11 @@ def read_plot(plane, view):
     return origin, extent, shades
 
 
+def rgb(name):
+    """An MCNP plot color (an X11 color name, such as DodgerBlue) as 0-255 RGB."""
+    return tuple(round(255 * v) for v in matplotlib.colors.to_rgb(name.lower()))
+
+
 def get_plots(mats):
     plots = []
     for plane, view in PLOTS:
@@ -404,7 +494,7 @@ def get_plots(mats):
         plot.width = (2 * extent, 2 * extent)
         plot.pixels = (1000, 1000)
         plot.color_by = 'material'
-        plot.colors = {mats[m]: X11_COLORS[c] for m, c in shades.items() if m in mats}
+        plot.colors = {mats[m]: rgb(color) for m, color in shades.items() if m in mats}
         plot.filename = os.path.join(IMAGES_DIR, f'artemis_openmc_geom_{plane}_{view}')
         plots.append(plot)
     return openmc.Plots(plots)
@@ -466,28 +556,55 @@ def get_settings(sources):
     settings.batches          = 10
     settings.particles        = int(1e7)
 
+    # A statepoint after every batch (each batch is 1e7 histories), with the source bank, so a run
+    # that stops can be continued with --restart
+    settings.statepoint       = {'batches': list(range(1, settings.batches + 1))}
+    settings.sourcepoint      = {'write': True}
+
     return settings
 
 
+def statepoints():
+    """Statepoint files in this folder, by batch."""
+    files = glob.glob(os.path.join(HERE, 'statepoint.*.h5'))
+    return sorted(files, key=lambda f: int(f.split('.')[-2]))
+
+
 def main():
+
+    parser = argparse.ArgumentParser(description='Simplified OpenMC model of Artemis')
+    parser.add_argument('--plot', action='store_true', help='make the geometry plots only')
+    parser.add_argument('--inputs', action='store_true', help='write model.xml only')
+    parser.add_argument('--restart', action='store_true',
+                        help='continue from the latest statepoint')
+    parser.add_argument('--threads', type=int, default=None,
+                        help='number of threads (default: all)')
+    args = parser.parse_args()
 
     check_source(SOURCE_H5)
 
     mats     = get_materials()
     geometry = get_geometry(mats)
-    tallies  = get_tallies(geometry)
-    plots    = get_plots(mats)
-    settings = get_settings(get_openmc_sources(SOURCE_H5))
+    model    = openmc.Model(geometry=geometry, materials=openmc.Materials(mats.values()),
+                            settings=get_settings(get_openmc_sources(SOURCE_H5)),
+                            tallies=get_tallies(geometry), plots=get_plots(mats))
 
-    openmc.Materials(mats.values()).export_to_xml()
-    geometry.export_to_xml()
-    tallies .export_to_xml()
-    plots   .export_to_xml()
-    settings.export_to_xml()
+    if args.plot:
+        model.plot_geometry(cwd=HERE)
+        return
+    model.export_to_model_xml(os.path.join(HERE, 'model.xml'))
+    if args.inputs:
+        return
 
-    openmc.plot_geometry()
+    restart = statepoints()[-1] if args.restart else None
+    if args.restart and restart is None:
+        raise SystemExit('No statepoint to restart from')
+    model.run(cwd=HERE, threads=args.threads, restart_file=restart, export_model_xml=False)
 
-    openmc.run()
+    # Keep only the final statepoint
+    for f in statepoints()[:-1]:
+        os.remove(f)
+    print(f'Tallies are per source particle: multiply them by {source_yield(SOURCE_H5):.6e} n/s.')
 
 
 if __name__ == '__main__': main()
