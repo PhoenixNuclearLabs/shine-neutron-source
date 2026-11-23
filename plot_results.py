@@ -8,12 +8,13 @@
 and the neutron and photon flux maps of the mesh tallies, from MCNP, OpenMC, or both.
 
     python plot_results.py            both
-    python plot_results.py --mcnp     MCNP results (mcnp/artemis.im and mcnp/artemis.imsht)
+    python plot_results.py --mcnp     MCNP results (mcnp/artemis/artemis.im and .imsht)
     python plot_results.py --openmc   OpenMC results (the latest openmc/statepoint.*.h5)
 
-The plots go in images/, with the geometry plots: artemis_spectrum_<particle>.png, the spectra in
-the cassette regions and at their peak flux, with every code given on the same axes, and maps for
-the pit and cavity views of the plot command files mcnp/plot_* (FIGURES), artemis_<code>_<name>.png:
+The plots go in images/artemis/, with the geometry plots: artemis_spectrum_<particle>.png, the
+spectra in the cassette regions and at their peak flux, with every code given on the same axes,
+and maps for the pit and cavity views of the plot command files mcnp/artemis/plot_* (FIGURES),
+artemis_<code>_<name>.png:
 
     neutron_flux_total_<view>         neutron flux
     neutron_flux_<group>_<view>       neutron flux in each energy group (NEUTRON_GROUPS)
@@ -38,7 +39,7 @@ and so do all its dose (kerma) maps (SCALE_GROUP). Anything below vmin is shown 
 instead of being left blank. There is a contour line at each colorbar tick, labeled with its value
 and drawn on the colorbar too.
 Material boundaries are drawn on top from the OpenMC geometry plot of the same window
-(images/artemis_openmc_geom_<plane>_<view>.png, made by plot_geometry.py), which shows only
+(images/artemis/artemis_openmc_geom_<plane>_<view>.png, made by plot_geometry.py), which shows only
 material boundaries (the MCNP plots also show the boundaries between cells of one material). The
 cassette regions, which are air like the cavities around them, have their open sides dashed.
 Each mesh bin is drawn as a solid block. The figures are about as wide as a GitHub page (at 150
@@ -72,13 +73,13 @@ plt.rcParams["font.family"] = "serif"
 plt.rcParams["mathtext.default"] = "regular"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-MCNP_DIR = os.path.join(HERE, "mcnp")
+MCNP_DIR = os.path.join(HERE, "mcnp", "artemis")
 OPENMC_DIR = os.path.join(HERE, "openmc")
-IMAGES_DIR = os.path.join(HERE, "images")
+IMAGES_DIR = os.path.join(HERE, "images", "artemis")
 DOCS_DIR = os.path.join(HERE, "docs", "figures")
 
-# The README's result figures: copied from images/ to docs/figures/ with --docs (after the final
-# runs of both codes)
+# The README's result figures: copied from images/artemis/ to docs/figures/ with --docs (after the
+# final runs of both codes)
 DOC_FIGURES = [
     "artemis_spectrum_neutron.png",
     "artemis_spectrum_photon.png",
@@ -702,8 +703,8 @@ def print_silicon(results):
 
 
 def save(fig, name, indexed=False):
-    """Save a figure in images/, at 150 dpi; indexed: as a 256-color indexed PNG (about a quarter
-    the size of a full-color one, and looks the same: the colormap has 256 colors)."""
+    """Save a figure in images/artemis/, at 150 dpi; indexed: as a 256-color indexed PNG (about a
+    quarter the size of a full-color one, and looks the same: the colormap has 256 colors)."""
     from PIL import Image
 
     filename = os.path.join(IMAGES_DIR, name)

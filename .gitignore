@@ -1,2 +1,2 @@
-/images/artemis_*.png
-!/images/artemis_*_geom_*.png
+/images/*/*.png
+!/images/*/*_geom_*.png

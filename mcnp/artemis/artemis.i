@@ -4,7 +4,7 @@ c  Author:       Lucas Jacobson
 c  Created on:   November 20, 2026
 c  Last updated: November 22, 2026
 c
-c  Copyright 2026, SHINE Technologies, LLC. MIT License: see ../LICENSE.
+c  Copyright 2026, SHINE Technologies, LLC. MIT License: see ../../LICENSE.
 c
 c  A very simplified model of the Artemis neutron generator below ground:
 c  the target chamber with its double wall, the upstream section of the
@@ -18,11 +18,11 @@ c
 c  The backstop is at the origin and the beam travels down (-z) from the
 c  top of the 137 cm source region. The ground is at z = 289.56 cm.
 c  Tallies are scaled by the total neutron yield (yield_total in
-c  ../source/Artemis/summary.toml). Responses in silicon use fm cards with
+c  ../../source/Artemis/summary.toml). Responses in silicon use fm cards with
 c  silicon (m311, which is in no cell): the 1-MeV(Si) equivalent neutron flux
 c  (the damage energy cross section, MT 444, over the 1 MeV reference of
 c  95 MeV-mb) and the neutron and photon kerma in silicon [rad(Si)/s]. The
-c  OpenMC model uses the same data, from ../data/silicon_*.txt.
+c  OpenMC model uses the same data, from ../../data/silicon_*.txt.
 c
 c  Geometry plots: mcnp6 ip i=artemis.i com=plot_xy_pit (or plot_xz_pit, or
 c  the zoomed plot_xy_cavity and plot_xz_cavity). The mesh tallies cover the
@@ -331,7 +331,7 @@ c ------------------------------------------------------------------------------
 c     Source definition
 c ------------------------------------------------------------------------------
 c
-  read        file = ../source/Artemis/source.sdef
+  read        file = ../../source/Artemis/source.sdef
 c
 c ------------------------------------------------------------------------------
 c     Tallies
@@ -684,9 +684,11 @@ c ------------------------------------------------------------------------------
 c
 c         Default data for every material: ENDF/B-VIII.1 neutrons (Lib81, .10c) and
 c         photons (eprdata25, .25p), as the OpenMC model's silicon tables
-c         (../data/silicon_*.txt)
+c         (../../data/silicon_*.txt)
 c
   m0      nlib=10c  plib=25p
+c
+c ------------------------------------------------------------------------------
 c
 c         Air (dry, near sea level)
 c         rho = 0.001205 g/cm^3

@@ -30,13 +30,13 @@ each cavity, as close to the chamber as the cavity wall allows.
 |---|---|
 | `source/artemis.toml` | The beam-target input for the source |
 | `source/Artemis/` | The source, all written by beam-target: `source.sdef` (MCNP), `source.h5` and its reader `openmc_source.py` (OpenMC), `summary.toml`, and `plots/` |
-| `mcnp/artemis.i` | The MCNP model |
-| `mcnp/plot_*` | MCNP geometry plot commands; the flux maps cover the same windows |
+| `mcnp/artemis/artemis.i` | The MCNP model |
+| `mcnp/artemis/plot_*` | MCNP geometry plot commands; the flux maps cover the same windows |
 | `openmc/artemis.py` | The OpenMC model, the same as the MCNP model |
 | `data/silicon_*.txt` | Responses in silicon for the OpenMC tallies, from the MCNP data (see [Responses in silicon](#responses-in-silicon)) |
 | `plot_geometry.py` | Geometry plots of both models |
 | `plot_results.py` | Spectra, maps, and tables from either code or both |
-| `images/` | Geometry plots (in the repository) and result plots (made locally) |
+| `images/artemis/` | Geometry plots (in the repository) and result plots (made locally); `images/apollo/` likewise |
 | `docs/figures/` | The result figures in this README |
 
 ## Quick start
@@ -53,8 +53,8 @@ each cavity, as close to the chamber as the cavity wall allows.
 **Run the models** (10⁸ histories each, about 1.6 hours on 32 cores):
 
 ```bash
-# MCNP, from mcnp/ (remove the artemis.i* outputs of an earlier run first)
-cd mcnp
+# MCNP, from mcnp/artemis/ (remove the artemis.i* outputs of an earlier run first)
+cd mcnp/artemis
 mcnp6 n=artemis.i tasks 14
 
 # OpenMC, from anywhere (it writes its files in openmc/)
@@ -73,7 +73,7 @@ python plot_results.py            # both codes; --mcnp or --openmc for one
 python plot_geometry.py           # geometry plots of both models
 ```
 
-`plot_results.py` writes about 25 plots per code to `images/` and prints the tables in
+`plot_results.py` writes about 25 plots per code to `images/artemis/` and prints the tables in
 [Results](#results).
 
 **Remake the source** with `beam-target source/artemis.toml -o source`. A new source changes the
@@ -98,12 +98,12 @@ down (−z), and the ground is at z = 289.56 cm. Every cell is a plain intersect
 half-spaces, so the model is easy to read and runs fast.
 
 <p align="center">
-<img src="images/artemis_mcnp_geom_xy_pit.png" width="400" />
-<img src="images/artemis_mcnp_geom_xz_pit.png" width="400" />
+<img src="images/artemis/artemis_mcnp_geom_xy_pit.png" width="400" />
+<img src="images/artemis/artemis_mcnp_geom_xz_pit.png" width="400" />
 </p>
 <p align="center">
-<img src="images/artemis_mcnp_geom_xy_cavity.png" width="400" />
-<img src="images/artemis_mcnp_geom_xz_cavity.png" width="400" />
+<img src="images/artemis/artemis_mcnp_geom_xy_cavity.png" width="400" />
+<img src="images/artemis/artemis_mcnp_geom_xz_cavity.png" width="400" />
 </p>
 
 **The cassette regions** (cells 106 and 206) are the space available for parts: a box 49.9 cm

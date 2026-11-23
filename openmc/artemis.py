@@ -4,13 +4,14 @@
 # Copyright 2026, SHINE Technologies, LLC. MIT License: see ../LICENSE.
 # ******************************************************************************
 
-# A very simplified model of the Artemis neutron generator, the same as ../mcnp/artemis.i: the
-# same dimensions, cells, surfaces, materials, and tallies, with the same cell, surface, material,
-# and tally numbers. It holds the target chamber with its double wall, the upstream section of the
-# beamline (the beam tube runs up to the ground), the two irradiation cavities with their cassette
-# regions and ducts, the water pit (full of water up to the ground), its liner, the concrete around
-# it, the earth, and the air above ground. The model is symmetric about x = 0 and y = 0. The
-# backstop is at the origin and the beam travels down (-z); the ground is at z = 289.56 cm.
+# A very simplified model of the Artemis neutron generator, the same as ../mcnp/artemis/artemis.i:
+# the same dimensions, cells, surfaces, materials, and tallies, with the same cell, surface,
+# material, and tally numbers. It holds the target chamber with its double wall, the upstream
+# section of the beamline (the beam tube runs up to the ground), the two irradiation cavities with
+# their cassette regions and ducts, the water pit (full of water up to the ground), its liner, the
+# concrete around it, the earth, and the air above ground. The model is symmetric about x = 0 and
+# y = 0. The backstop is at the origin and the beam travels down (-z); the ground is at z = 289.56
+# cm.
 #
 # Differences from the MCNP model:
 # - There is no cell for the void outside the model (MCNP cell 999): the outer surfaces of the
@@ -24,14 +25,14 @@
 # The neutron source comes from ../source/Artemis/source.h5, made by beam-target
 # (https://github.com/lucasjacobson/beam-target), and is read with ../source/Artemis/openmc_source.py,
 # which beam-target writes with it, so beam-target need not be installed to run this script. The
-# geometry plots and mesh tallies follow the MCNP plot command files ../mcnp/plot_*. Set
+# geometry plots and mesh tallies follow the MCNP plot command files ../mcnp/artemis/plot_*. Set
 # OPENMC_CROSS_SECTIONS to the cross_sections.xml of an ENDF/B-VIII.1 library, the data the MCNP
 # model uses.
 #
 # Run it from anywhere; OpenMC's files (model.xml, statepoints, ...) go in this folder:
 #   python artemis.py               write model.xml and run (a statepoint after every batch)
 #   python artemis.py --restart     continue the run from its latest statepoint
-#   python artemis.py --plot        make the geometry plots (../images/artemis_openmc_geom_*.png)
+#   python artemis.py --plot        make the geometry plots (../images/artemis/*_openmc_geom_*)
 #   python artemis.py --inputs      only write model.xml
 # Add --threads N to use N threads (default: all).
 
@@ -65,8 +66,8 @@ def get_openmc_sources(path):
     return module.get_openmc_sources(path)
 
 
-MCNP_DIR = os.path.join(HERE, "..", "mcnp")
-IMAGES_DIR = os.path.join(HERE, "..", "images")
+MCNP_DIR = os.path.join(HERE, "..", "mcnp", "artemis")
+IMAGES_DIR = os.path.join(HERE, "..", "images", "artemis")
 
 # ------------------------------------------------------------------------------
 # Dimensions [cm]
@@ -535,7 +536,8 @@ def prism_volume(region, surfaces):
 
 
 # ------------------------------------------------------------------------------
-# Geometry plots and mesh tallies, following the MCNP plot command files ../mcnp/plot_<plane>_<view>
+# Geometry plots and mesh tallies, following the MCNP plot command files
+# ../mcnp/artemis/plot_<plane>_<view>
 # ------------------------------------------------------------------------------
 PLOTS = [(plane, view) for view in ["pit", "cavity"] for plane in ["xy", "xz"]]
 
@@ -763,9 +765,10 @@ def main():
                             tallies=get_tallies(geometry))
     # fmt: on
 
-    # The geometry plots only with --plot: OpenMC checks that their folder (../images/) exists
-    # before any run that holds them
+    # The geometry plots only with --plot: OpenMC checks that their folder (../images/artemis/)
+    # exists before any run that holds them, and doesn't make it
     if args.plot:
+        os.makedirs(IMAGES_DIR, exist_ok=True)
         model.plots = get_plots(mats)
         model.plot_geometry(cwd=HERE)
         return
