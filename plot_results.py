@@ -88,9 +88,10 @@ MESH_TALLIES = {
     for m, view in enumerate(VIEWS)
     for n, plane in enumerate(PLANES)
 }
-# Peak values in each cassette region: one-bin mesh tallies over a plate against the cavity wall,
-# at the height of the peak flux, -x then +x: neutrons in the four groups, the neutron and photon
-# spectra (same bins as the cassette spectra), and the responses in silicon
+# Peak values in each cassette region: one-bin mesh tallies over a plate as close to the target
+# chamber as a part in the cassette can get (from x = +-7.8 cm), at the height of the peak flux,
+# -x then +x: neutrons in the four groups, the neutron and photon spectra (same bins as the
+# cassette spectra), and the responses in silicon
 PEAK_TALLIES = {
     "neutron": {"-x": 264, "+x": 274},
     "si": {"-x": 324, "+x": 334},

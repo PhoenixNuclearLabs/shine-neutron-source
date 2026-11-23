@@ -576,10 +576,11 @@ MESH_BINS = {"pit": 2.54, "cavity": 1.27}
 # Energy groups of the neutron mesh tallies [eV]: below 0.5 eV, 0.5 eV to 0.1 MeV, 0.1 to 10 MeV,
 # and above 10 MeV (up to the top of the cassette spectrum's bins), as emesh in the MCNP deck
 NEUTRON_GROUPS = [0.0, 0.5, 1e5, 1e7, 1e9]
-# Peak neutron flux in each cassette region: a 5 x 5 cm plate, 0.1 cm thick, against the cavity wall
-# around the target chamber (where it crosses the x axis), centered at the height of the peak flux
-# (the height of the plot_xy planes)
-PLATE_WIDTH, PLATE_THICKNESS, Z_PEAK = 5.0, 0.1, 55.88
+# Peak neutron flux in each cassette region: a 5 x 5 cm plate, 0.1 cm thick, from PLATE_X from the
+# beam axis (along x), about as close as a part in the cassette can get (behind the cassette's
+# front plate in the full model), centered at the height of the peak flux (the height of the
+# plot_xy planes)
+PLATE_X, PLATE_WIDTH, PLATE_THICKNESS, Z_PEAK = 7.8, 5.0, 0.1, 55.88
 # Responses in silicon, from the tables in data/ (from MCNP's own ACE files for silicon, so they are
 # the same data as the MCNP deck's fm cards with m311 use):
 # - 1-MeV(Si) equivalent neutron flux: the flux times the damage energy cross section (MT 444) over
@@ -676,12 +677,12 @@ def get_tallies(geom):
                   openmc.MeshFilter(mesh), only[particle], energy[quantity])  # fmt: skip
             number += 10
 
-    # Peak flux in each cassette region, -x then +x: one-bin meshes over a plate against the
-    # cavity wall, for neutrons in the four groups, the neutron spectrum, the photon spectrum, the
+    # Peak flux in each cassette region, -x then +x: one-bin meshes over a plate in the cassette
+    # region, for neutrons in the four groups, the neutron spectrum, the photon spectrum, the
     # 1-MeV(Si) equivalent neutron flux, and the neutron and photon kerma in silicon
     plates = {}
     for n, sign in [(number, -1), (number + 10, +1)]:
-        x0, x1 = sorted([sign * R_CAV_WALL, sign * (R_CAV_WALL + PLATE_THICKNESS)])
+        x0, x1 = sorted([sign * PLATE_X, sign * (PLATE_X + PLATE_THICKNESS)])
         mesh = openmc.RegularMesh(mesh_id=n)
         mesh.lower_left = [x0, -PLATE_WIDTH / 2, Z_PEAK - PLATE_WIDTH / 2]
         mesh.upper_right = [x1, PLATE_WIDTH / 2, Z_PEAK + PLATE_WIDTH / 2]

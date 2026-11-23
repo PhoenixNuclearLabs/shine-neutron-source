@@ -29,8 +29,9 @@ c  the zoomed plot_xy_cavity and plot_xz_cavity). The mesh tallies cover the
 c  same windows as these plots, except fmesh264 to fmesh374: the peak values
 c  in each cassette region (neutrons in four groups, the neutron and photon
 c  spectra, the 1-MeV(Si) equivalent flux, and the neutron and photon kerma
-c  in silicon), on a 5 x 5 cm plate, 0.1 cm thick, against the cavity wall
-c  at the height of the peak flux.
+c  in silicon), on a 5 x 5 cm plate, 0.1 cm thick, from x = +-7.8 cm (about
+c  as close to the target chamber as a part in the cassette can get) at the
+c  height of the peak flux.
 c
 c ******************************************************************************
 c
@@ -570,15 +571,16 @@ c
               factor = 1.748845e13
   fm254       3.43541e-10 311 -5 -6
 c
-c     Peak flux in the cassette regions: a 5 x 5 cm plate, 0.1 cm thick, against the
-c     cavity wall around the target chamber, centered at z = 55.88 cm: neutrons in the
+c     Peak flux in the cassette regions: a 5 x 5 cm plate, 0.1 cm thick, from x = +-7.8 cm
+c     (about as close to the target chamber as a part in the cassette can get, behind the
+c     cassette's front plate), centered at z = 55.88 cm: neutrons in the
 c     four groups, the neutron spectrum (CCFE-709), the photon spectrum (VITAMIN-J-42), the
 c     1-MeV(Si) equivalent neutron flux, and the neutron and photon kerma in silicon
 c
   fc264       Peak neutron flux in the -x cassette region
   fmesh264:n  geom   = xyz
-              origin = -7.16501 -2.5 53.38
-              imesh  = -7.06501  iints =   1
+              origin = -7.9 -2.5 53.38
+              imesh  =     -7.8  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               emesh  = 5e-7 0.1 10 1000
@@ -586,8 +588,8 @@ c
 c
   fc274       Peak neutron flux in the +x cassette region
   fmesh274:n  geom   = xyz
-              origin = 7.06501 -2.5 53.38
-              imesh  =  7.16501  iints =   1
+              origin = 7.8 -2.5 53.38
+              imesh  =      7.9  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               emesh  = 5e-7 0.1 10 1000
@@ -595,8 +597,8 @@ c
 c
   fc284       Peak neutron spectrum in the -x cassette region (CCFE-709)
   fmesh284:n  geom   = xyz
-              origin = -7.16501 -2.5 53.38
-              imesh  = -7.06501  iints =   1
+              origin = -7.9 -2.5 53.38
+              imesh  =     -7.8  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               emesh  = 1e-11 599ilog 10 49i 20 9i 30 14i 60 3i 80
@@ -605,8 +607,8 @@ c
 c
   fc294       Peak neutron spectrum in the +x cassette region (CCFE-709)
   fmesh294:n  geom   = xyz
-              origin = 7.06501 -2.5 53.38
-              imesh  =  7.16501  iints =   1
+              origin = 7.8 -2.5 53.38
+              imesh  =      7.9  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               emesh  = 1e-11 599ilog 10 49i 20 9i 30 14i 60 3i 80
@@ -615,8 +617,8 @@ c
 c
   fc304       Peak photon spectrum in the -x cassette region (VITAMIN-J-42)
   fmesh304:p  geom   = xyz
-              origin = -7.16501 -2.5 53.38
-              imesh  = -7.06501  iints =   1
+              origin = -7.9 -2.5 53.38
+              imesh  =     -7.8  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               emesh  = 0.001 0.01 i 0.03 i 0.06 0.07 0.075 0.1 i 0.2 i 0.4
@@ -626,8 +628,8 @@ c
 c
   fc314       Peak photon spectrum in the +x cassette region (VITAMIN-J-42)
   fmesh314:p  geom   = xyz
-              origin = 7.06501 -2.5 53.38
-              imesh  =  7.16501  iints =   1
+              origin = 7.8 -2.5 53.38
+              imesh  =      7.9  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               emesh  = 0.001 0.01 i 0.03 i 0.06 0.07 0.075 0.1 i 0.2 i 0.4
@@ -637,8 +639,8 @@ c
 c
   fc324       Peak 1-MeV(Si) equivalent flux in the -x cassette region
   fmesh324:n  geom   = xyz
-              origin = -7.16501 -2.5 53.38
-              imesh  = -7.06501  iints =   1
+              origin = -7.9 -2.5 53.38
+              imesh  =     -7.8  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               factor = 1.748845e13
@@ -646,8 +648,8 @@ c
 c
   fc334       Peak 1-MeV(Si) equivalent flux in the +x cassette region
   fmesh334:n  geom   = xyz
-              origin = 7.06501 -2.5 53.38
-              imesh  =  7.16501  iints =   1
+              origin = 7.8 -2.5 53.38
+              imesh  =      7.9  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               factor = 1.748845e13
@@ -655,8 +657,8 @@ c
 c
   fc344       Peak neutron kerma in silicon in the -x cassette region
   fmesh344:n  geom   = xyz
-              origin = -7.16501 -2.5 53.38
-              imesh  = -7.06501  iints =   1
+              origin = -7.9 -2.5 53.38
+              imesh  =     -7.8  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               factor = 1.748845e13
@@ -664,8 +666,8 @@ c
 c
   fc354       Peak neutron kerma in silicon in the +x cassette region
   fmesh354:n  geom   = xyz
-              origin = 7.06501 -2.5 53.38
-              imesh  =  7.16501  iints =   1
+              origin = 7.8 -2.5 53.38
+              imesh  =      7.9  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               factor = 1.748845e13
@@ -673,8 +675,8 @@ c
 c
   fc364       Peak photon kerma in silicon in the -x cassette region
   fmesh364:p  geom   = xyz
-              origin = -7.16501 -2.5 53.38
-              imesh  = -7.06501  iints =   1
+              origin = -7.9 -2.5 53.38
+              imesh  =     -7.8  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               factor = 1.748845e13
@@ -682,8 +684,8 @@ c
 c
   fc374       Peak photon kerma in silicon in the +x cassette region
   fmesh374:p  geom   = xyz
-              origin = 7.06501 -2.5 53.38
-              imesh  =  7.16501  iints =   1
+              origin = 7.8 -2.5 53.38
+              imesh  =      7.9  iints =   1
               jmesh  =      2.5  jints =   1
               kmesh  =    58.38  kints =   1
               factor = 1.748845e13
