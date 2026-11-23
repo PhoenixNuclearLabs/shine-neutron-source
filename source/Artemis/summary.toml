@@ -2,9 +2,9 @@
 
 [run]
 name                    = "Artemis"
-code_version            = "3eaff23441959f6ed6bc281f2227dcb9692ae252"
+code_version            = "c64553a391bc7fd3d3932f2d0afd66b5b4f06cb5"
 code_url                = "https://github.com/lucasjacobson/beam-target"
-created                 = "2026-11-22T22:04:23+00:00"
+created                 = "2026-11-23T03:44:21+00:00"
 input_file              = "source/artemis.toml"
 sdef_direction          = "-z"
 sdef_entry_position     = [0.0, 0.0, 137.0]
@@ -18,7 +18,7 @@ region                  = ["chamber"]      # per region: names (if any)
 material                = ["DT50"]         # per region; see [materials]
 pressure                = [nan]            # torr; nan where unused
 temperature             = [nan]            # degC; nan where unused
-density                 = [1.496722e-06]   # g/cm3, calculated for region 1; nan where unused
+density                 = [1.470355e-06]   # g/cm3, calculated for region 1; nan where unused
 length                  = [137.0]          # cm
 beam_energy_backstop    = 10.0             # keV, requested
 beam_radius_entry       = 0.2              # cm
@@ -28,20 +28,20 @@ position_bins           = [137]
 position_substeps       = [10]             # per position bin
 angle_bin_width         = 1.0              # deg
 energy_bin_width        = 0.01             # MeV
-stopping_power          = "srim"
+stopping_power          = "icru49"
 nuclear_data            = ["drosg"]        # libraries, searched in order
 nuclear_data_dirs       = ["drosg"]        # where they were found
 
 [results]
-yield_total             = 1.77562e+13      # n/s
-yield_DD                = 1.701041e+11     # n/s, D(d,n)3He
-yield_DT                = 1.75861e+13      # n/s, T(d,n)4He
-fraction_DD             = 0.00957998       # share of the total yield
-fraction_DT             = 0.99042          # share of the total yield
-mean_neutron_energy     = 14.00315         # MeV, all reactions and angles
-mean_neutron_energy_DD  = 2.547529         # MeV, over all angles
-mean_neutron_energy_DT  = 14.11395         # MeV, over all angles
-atom_density            = [3.583778e+17]   # atoms/cm3, in each region
+yield_total             = 1.748845e+13     # n/s
+yield_DD                = 1.664335e+11     # n/s, D(d,n)3He
+yield_DT                = 1.732202e+13     # n/s, T(d,n)4He
+fraction_DD             = 0.009516767      # share of the total yield
+fraction_DT             = 0.9904832        # share of the total yield
+mean_neutron_energy     = 14.00358         # MeV, all reactions and angles
+mean_neutron_energy_DD  = 2.547295         # MeV, over all angles
+mean_neutron_energy_DT  = 14.11365         # MeV, over all angles
+atom_density            = [3.520643e+17]   # atoms/cm3, in each region
 beam_energy_region_end  = [10.0]           # keV, at the end of each region
 beam_energy_backstop    = 10.0             # keV
 beam_radius_backstop    = 5.132            # cm, beam edge; capped at the wall
@@ -52,7 +52,7 @@ beam_power_wall         = 0.0              # kW, carried onto the wall by scrapi
 beam_power_backstop     = 0.45             # kW
 beam_power_nuclear      = 0.0              # kW, of the deposited power: beam lost to nuclear reactions
 beam_nuclear_loss       = 0.0              # fraction of the beam removed by nuclear reactions
-neutron_scrape_fraction = 2.199174e-16     # neutrons lost to scraping
+neutron_scrape_fraction = 0.0              # neutrons lost to scraping
 
 [materials.DT50]
 phase                   = "gas"
