@@ -12,10 +12,11 @@ and the neutron and photon flux maps of the mesh tallies, from MCNP, OpenMC, or 
     python plot_results.py --openmc   OpenMC results (the latest openmc/statepoint.*.h5)
 
 The plots go in images/, with the geometry plots: artemis_spectrum_<particle>.png, the spectra in
-the cassette regions and at their peak flux, with every code given on the same axes, and
-artemis_<code>_<particle>_flux_<view>.png, for the pit and cavity views of the plot command files
-mcnp/plot_*. The neutron flux is also given in four energy groups
-(NEUTRON_GROUPS), in artemis_<code>_neutron_flux_<group>_<view>.png. The peak neutron flux in each
+the cassette regions and at their peak flux, with every code given on the same axes, and flux maps
+for the pit and cavity views of the plot command files mcnp/plot_*: the neutron flux in total and
+in four energy groups (NEUTRON_GROUPS), artemis_<code>_neutron_flux_total_<view>.png and
+artemis_<code>_neutron_flux_<group>_<view>.png, and the photon flux,
+artemis_<code>_photon_flux_<view>.png. The peak neutron flux in each
 cassette region (PEAK_TALLIES), in each energy group and in total, is printed as a table. Reading
 MCNP results needs mcnptools (which comes with MCNP), and reading OpenMC results needs the openmc
 Python package.
@@ -411,7 +412,11 @@ def plot_flux(results):
         if view == "cavity":
             title += " (cavities)"
         units = UNITS[particle]
-        suffix = view if group is None else f"{group}_{view}"
+        # The neutron flux in total is named like its energy groups; the photon flux is all total
+        if group is not None:
+            suffix = f"{group}_{view}"
+        else:
+            suffix = f"total_{view}" if particle == "neutron" else view
         top = max(np.max(flux) for panels in maps.values() for _, flux in panels)
         norm = (LogNorm if scale == "log" else Normalize)(vmin, top if vmax is None else vmax)
         for name, panels in maps.items():
