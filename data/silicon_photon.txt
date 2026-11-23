@@ -3,6 +3,12 @@
 # photoatomic ACE file 14000.25p (eprdata25, LA-UR-26-27338), so the two codes agree.
 # Made with openmc.data.IncidentPhoton.from_ace: the heating cross section (the total cross section
 # times the heating number, MT 525). Interpolate log-log, as ACE photon data.
+# Source data: eprdata25, the ACE library of the ENDF/B-VIII.1 photo-atomic, electro-atomic, and atomic
+# relaxation sublibraries, produced at Los Alamos National Laboratory (operated by Triad National
+# Security, LLC, for the U.S. Department of Energy's NNSA): Haeck and Lively, "Release of eprdata25:
+# ENDF/B-VIII.1-Based ACE Data Files for Photo- and Electro-atomic Transport", LA-UR-26-27338;
+# downloaded from https://nucleardata.lanl.gov/ace/eprdata25. This table is derived from it by SHINE
+# Technologies; it is not a product of, or endorsed by, Los Alamos National Laboratory.
 # Columns: energy [eV], heating cross section [eV-b]
 1.00000000e+00 2.10015289e-12
 1.05924839e+00 2.64393304e-12

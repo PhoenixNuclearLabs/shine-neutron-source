@@ -6,6 +6,11 @@
 # (MT 444) and the heating cross section (the total cross section times the heating number, MT 301),
 # combined by atom fraction on the union of the isotopes' energy grids. Interpolate linearly in both
 # energy and value, as ACE neutron data.
+# Source data: Lib81, the ACE library of the ENDF/B-VIII.1 neutron sublibrary, produced by the Nuclear
+# Data Team of Los Alamos National Laboratory (operated by Triad National Security, LLC, for the U.S.
+# Department of Energy's NNSA): Gibson et al., LANL memorandum XCP-5:25-022, LA-UR-25-29061; from
+# https://nucleardata.lanl.gov/ace/lib81. This table is derived from it by SHINE Technologies; it is
+# not a product of, or endorsed by, Los Alamos National Laboratory.
 # Columns: energy [eV], damage energy cross section [eV-b], heating cross section [eV-b]
 1.00000000e-05 5.30548609e+03 6.54056130e+03
 1.03125000e-05 5.22525918e+03 6.44165711e+03
