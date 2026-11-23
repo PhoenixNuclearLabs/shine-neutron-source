@@ -25,7 +25,8 @@ the pit and cavity views of the plot command files mcnp/plot_* (FIGURES), artemi
     neutron_hardness_<view>           1-MeV(Si) equivalent over total neutron flux
     neutron_fraction_high_<view>      neutron flux above 10 MeV over total neutron flux
 
-Tables of the peak neutron flux in each cassette region by energy group, and of the responses in
+With --docs, the README's figures (DOC_FIGURES) are also copied to docs/figures/. Tables of the
+peak neutron flux in each cassette region by energy group, and of the responses in
 silicon in the cassette regions and at their peak, are printed. Reading MCNP results needs
 mcnptools (which comes with MCNP), and reading OpenMC results needs the openmc Python package.
 
@@ -51,6 +52,7 @@ import argparse
 import glob
 import io
 import os
+import shutil
 import sys
 import time
 import warnings
@@ -70,6 +72,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MCNP_DIR = os.path.join(HERE, "mcnp")
 OPENMC_DIR = os.path.join(HERE, "openmc")
 IMAGES_DIR = os.path.join(HERE, "images")
+DOCS_DIR = os.path.join(HERE, "docs", "figures")
+
+# The README's result figures: copied from images/ to docs/figures/ with --docs (after the final
+# runs of both codes)
+DOC_FIGURES = [
+    "artemis_spectrum_neutron.png",
+    "artemis_spectrum_photon.png",
+    "artemis_mcnp_neutron_flux_total_cavity.png",
+    "artemis_mcnp_neutron_flux_high_cavity.png",
+    "artemis_mcnp_neutron_flux_si_eq_cavity.png",
+    "artemis_mcnp_neutron_fraction_high_cavity.png",
+    "artemis_mcnp_kerma_photon_cavity.png",
+]
 
 CASSETTE_CELLS = [106, 206]
 SPECTRUM_TALLIES = {"neutron": 14, "photon": 24}
@@ -690,6 +705,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--mcnp", action="store_true", help="MCNP results only")
     parser.add_argument("--openmc", action="store_true", help="OpenMC results only")
+    parser.add_argument(
+        "--docs", action="store_true", help="also copy the README's figures to docs/figures/"
+    )
     args = parser.parse_args()
     both = not (args.mcnp or args.openmc)
 
@@ -702,6 +720,11 @@ def main():
     plot_flux(results)
     print_peak(results)
     print_silicon(results)
+    if args.docs:
+        os.makedirs(DOCS_DIR, exist_ok=True)
+        for name in DOC_FIGURES:
+            shutil.copy2(os.path.join(IMAGES_DIR, name), os.path.join(DOCS_DIR, name))
+            print("Copied", os.path.relpath(os.path.join(DOCS_DIR, name), HERE))
 
 
 if __name__ == "__main__":
