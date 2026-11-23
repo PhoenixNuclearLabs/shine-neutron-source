@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # ******************************************************************************
-# Copyright 2026, SHINE Technologies. All rights reserved.
+# Copyright 2026, SHINE Technologies, LLC. MIT License: see LICENSE.
 # ******************************************************************************
 
 """Make the geometry plots of the Artemis models, from the plot command files mcnp/plot_*: one

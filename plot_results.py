@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # ******************************************************************************
-# Copyright 2026, SHINE Technologies. All rights reserved.
+# Copyright 2026, SHINE Technologies, LLC. MIT License: see LICENSE.
 # ******************************************************************************
 
 """Plot the results of the Artemis models: the neutron and photon spectra in the cassette regions,

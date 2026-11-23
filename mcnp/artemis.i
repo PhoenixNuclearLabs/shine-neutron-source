@@ -4,7 +4,7 @@ c  Author:       Lucas Jacobson
 c  Created on:   November 20, 2026
 c  Last updated: November 22, 2026
 c
-c  Copyright 2026, SHINE Technologies. All rights reserved.
+c  Copyright 2026, SHINE Technologies, LLC. MIT License: see ../LICENSE.
 c
 c  A very simplified model of the Artemis neutron generator below ground:
 c  the target chamber with its double wall, the upstream section of the

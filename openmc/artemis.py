@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # ******************************************************************************
-# Copyright 2026, SHINE Technologies. All rights reserved.
+# Copyright 2026, SHINE Technologies, LLC. MIT License: see ../LICENSE.
 # ******************************************************************************
 
 # A very simplified model of the Artemis neutron generator, the same as ../mcnp/artemis.i: the
