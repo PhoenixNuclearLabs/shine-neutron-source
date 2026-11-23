@@ -43,183 +43,162 @@ c ------------------------------------------------------------------------------
 c     Target chamber and upstream section
 c ------------------------------------------------------------------------------
 c
-    1    0                    -103   412  -420                    $ Vacuum in target chamber
-    2  112  -8.96             -103   411  -412                    $ Copper beam stop
-    3  331  -8.03             -104   410  -411                    $ Steel plate below beam stop
-    4  331  -8.03        103  -104   411  -419                    $ Target chamber inner wall
-    5  392  -0.997       104  -105   410  -419                    $ Cooling water jacket
-    6  392  -0.997            -105   409  -410                    $ Cooling water behind beam stop
-    7  331  -8.03        105  -106   409  -419                    $ Target chamber outer wall
-    8  331  -8.03             -106   407  -409                    $ Target chamber end plate
-    9  331  -8.03        103  -112   419  -420                    $ Upstream tube bottom plate
-   10    0                    -111   420  -421                    $ Vacuum in upstream tube
-   11  331  -8.03        111  -112   420  -421                    $ Upstream tube
-   12  331  -8.03        102  -112   421  -422                    $ Upstream tube top plate
-   13    0                    -101   421  -424                    $ Vacuum in beam tube
-   14  331  -8.03        101  -102   421  -424                    $ Beam tube
-   15  392  -0.997       106  -107  -214   407  -418              $ Water between chamber and cavity (-x)
-                         vol=1316.30
-   16  392  -0.997       106  -108   214   407  -418              $ Water between chamber and cavity (+x)
-                         vol=1316.30
-   17  392  -0.997      -107  -214   406  -407                    $ Water below chamber, in cavity (-x)
-                         vol=52.40
-   18  392  -0.997      -108   214   406  -407                    $ Water below chamber, in cavity (+x)
-                         vol=52.40
+    1    0                  -103  412 -420                                 $ Vacuum in target chamber
+    2  112  -8.96           -103  411 -412                                 $ Copper beam stop
+    3  331  -8.03           -104  410 -411                                 $ Steel plate below beam stop
+    4  331  -8.03       103 -104  411 -419                                 $ Target chamber inner wall
+    5  392  -0.997      104 -105  410 -419                                 $ Cooling water jacket
+    6  392  -0.997          -105  409 -410                                 $ Cooling water behind beam stop
+    7  331  -8.03       105 -106  409 -419                                 $ Target chamber outer wall
+    8  331  -8.03           -106  407 -409                                 $ Target chamber end plate
+    9  331  -8.03       103 -112  419 -420                                 $ Upstream tube bottom plate
+   10    0                  -111  420 -421                                 $ Vacuum in upstream tube
+   11  331  -8.03       111 -112  420 -421                                 $ Upstream tube
+   12  331  -8.03       102 -112  421 -422                                 $ Upstream tube top plate
+   13    0                  -101  421 -424                                 $ Vacuum in beam tube
+   14  331  -8.03       101 -102  421 -424                                 $ Beam tube
+   15  392  -0.997      106 -107 -214  407 -418            vol=1316.30     $ Water between chamber and cavity (-x)
+   16  392  -0.997      106 -108  214  407 -418            vol=1316.30     $ Water between chamber and cavity (+x)
+   17  392  -0.997     -107 -214  406 -407                 vol=52.40       $ Water below chamber, in cavity (-x)
+   18  392  -0.997     -108  214  406 -407                 vol=52.40       $ Water below chamber, in cavity (+x)
 c
 c ------------------------------------------------------------------------------
 c     Irradiation cavity, cassette region, and ducts (-x)
 c ------------------------------------------------------------------------------
 c
-  101    4  -0.001205    211  -212   307  -314   408  -417        $ Air in cavity, beyond cassette (-x)
-  102    4  -0.001205    212  -213   311  -314   408  -417        $ Air in cavity, +y of cassette (-x)
-  103    4  -0.001205    212  -213   307  -310   408  -417        $ Air in cavity, -y of cassette (-x)
-  104    4  -0.001205    212  -213   310  -311   408  -415   109  $ Air in cavity, below cassette (-x)
-                         vol=38256.58
-  105    4  -0.001205    212  -213   310  -311   416  -417   109  $ Air in cavity, above cassette (-x)
-                         vol=15292.67
-  106    4  -0.001205    212  -213   310  -311   415  -416   109  $ Cassette region (-x)
-                         vol=153175.77
-  107   13  -2.7         210  -214   306  -315   406  -408   107  $ Cavity bottom (-x)
-                         vol=7888.32
-  108   13  -2.7         210  -214   306  -315   417  -418   107  $ Cavity top (-x)
-                         vol=7888.32
-  109   13  -2.7         210  -214   314  -315   408  -417        $ Cavity +y wall (-x)
-  110   13  -2.7         210  -214   306  -307   408  -417        $ Cavity -y wall (-x)
-  111   13  -2.7         213  -214   307  -314   408  -417   107  $ Cavity inner wall (-x)
-                         vol=10324.31
-  112   13  -2.7        -213   107  -109   408  -417              $ Cavity wall around chamber (-x)
-                         vol=1352.35
-  113   13  -2.7         210  -211   312  -314   408  -417        $ Cavity outer wall, +y of duct (-x)
-  114   13  -2.7         210  -211   307  -309   408  -417        $ Cavity outer wall, -y of duct (-x)
-  115   13  -2.7         210  -211   309  -312   408  -414        $ Cavity outer wall, below duct (-x)
-  116    4  -0.001205    208  -211   309  -312   414  -417        $ Air in horizontal duct (-x)
-  117   13  -2.7         209  -210   312  -313   413  -418        $ Horizontal duct +y wall (-x)
-  118   13  -2.7         209  -210   308  -309   413  -418        $ Horizontal duct -y wall (-x)
-  119   13  -2.7         209  -210   309  -312   413  -414        $ Horizontal duct bottom (-x)
-  120   13  -2.7         209  -210   309  -312   417  -418        $ Horizontal duct top (-x)
-  121    4  -0.001205    207  -208   309  -312   408  -424        $ Air in vertical duct (-x)
-  122   13  -2.7         208  -209   309  -312   408  -414        $ Vertical duct inner wall, below (-x)
-  123   13  -2.7         208  -209   309  -312   417  -424        $ Vertical duct inner wall, above (-x)
-  124   13  -2.7         206  -207   309  -312   408  -424        $ Vertical duct outer wall (-x)
-  125   13  -2.7         206  -209   312  -313   406  -424        $ Vertical duct +y wall (-x)
-  126   13  -2.7         206  -209   308  -309   406  -424        $ Vertical duct -y wall (-x)
-  127   13  -2.7         206  -209   309  -312   406  -408        $ Vertical duct bottom (-x)
+  101    4  -0.001205   211 -212  307 -314  408 -417                       $ Air in cavity, beyond cassette (-x)
+  102    4  -0.001205   212 -213  311 -314  408 -417                       $ Air in cavity, +y of cassette (-x)
+  103    4  -0.001205   212 -213  307 -310  408 -417                       $ Air in cavity, -y of cassette (-x)
+  104    4  -0.001205   212 -213  310 -311  408 -415  109  vol=38256.58    $ Air in cavity, below cassette (-x)
+  105    4  -0.001205   212 -213  310 -311  416 -417  109  vol=15292.67    $ Air in cavity, above cassette (-x)
+  106    4  -0.001205   212 -213  310 -311  415 -416  109  vol=153175.77   $ Cassette region (-x)
+  107   13  -2.7        210 -214  306 -315  406 -408  107  vol=7888.32     $ Cavity bottom (-x)
+  108   13  -2.7        210 -214  306 -315  417 -418  107  vol=7888.32     $ Cavity top (-x)
+  109   13  -2.7        210 -214  314 -315  408 -417                       $ Cavity +y wall (-x)
+  110   13  -2.7        210 -214  306 -307  408 -417                       $ Cavity -y wall (-x)
+  111   13  -2.7        213 -214  307 -314  408 -417  107  vol=10324.31    $ Cavity inner wall (-x)
+  112   13  -2.7       -213  107 -109  408 -417            vol=1352.35     $ Cavity wall around chamber (-x)
+  113   13  -2.7        210 -211  312 -314  408 -417                       $ Cavity outer wall, +y of duct (-x)
+  114   13  -2.7        210 -211  307 -309  408 -417                       $ Cavity outer wall, -y of duct (-x)
+  115   13  -2.7        210 -211  309 -312  408 -414                       $ Cavity outer wall, below duct (-x)
+  116    4  -0.001205   208 -211  309 -312  414 -417                       $ Air in horizontal duct (-x)
+  117   13  -2.7        209 -210  312 -313  413 -418                       $ Horizontal duct +y wall (-x)
+  118   13  -2.7        209 -210  308 -309  413 -418                       $ Horizontal duct -y wall (-x)
+  119   13  -2.7        209 -210  309 -312  413 -414                       $ Horizontal duct bottom (-x)
+  120   13  -2.7        209 -210  309 -312  417 -418                       $ Horizontal duct top (-x)
+  121    4  -0.001205   207 -208  309 -312  408 -424                       $ Air in vertical duct (-x)
+  122   13  -2.7        208 -209  309 -312  408 -414                       $ Vertical duct inner wall, below (-x)
+  123   13  -2.7        208 -209  309 -312  417 -424                       $ Vertical duct inner wall, above (-x)
+  124   13  -2.7        206 -207  309 -312  408 -424                       $ Vertical duct outer wall (-x)
+  125   13  -2.7        206 -209  312 -313  406 -424                       $ Vertical duct +y wall (-x)
+  126   13  -2.7        206 -209  308 -309  406 -424                       $ Vertical duct -y wall (-x)
+  127   13  -2.7        206 -209  309 -312  406 -408                       $ Vertical duct bottom (-x)
 c
 c ------------------------------------------------------------------------------
 c     Irradiation cavity, cassette region, and ducts (+x)
 c ------------------------------------------------------------------------------
 c
-  201    4  -0.001205    216  -217   307  -314   408  -417        $ Air in cavity, beyond cassette (+x)
-  202    4  -0.001205    215  -216   311  -314   408  -417        $ Air in cavity, +y of cassette (+x)
-  203    4  -0.001205    215  -216   307  -310   408  -417        $ Air in cavity, -y of cassette (+x)
-  204    4  -0.001205    215  -216   310  -311   408  -415   110  $ Air in cavity, below cassette (+x)
-                         vol=38256.58
-  205    4  -0.001205    215  -216   310  -311   416  -417   110  $ Air in cavity, above cassette (+x)
-                         vol=15292.67
-  206    4  -0.001205    215  -216   310  -311   415  -416   110  $ Cassette region (+x)
-                         vol=153175.77
-  207   13  -2.7         214  -218   306  -315   406  -408   108  $ Cavity bottom (+x)
-                         vol=7888.32
-  208   13  -2.7         214  -218   306  -315   417  -418   108  $ Cavity top (+x)
-                         vol=7888.32
-  209   13  -2.7         214  -218   314  -315   408  -417        $ Cavity +y wall (+x)
-  210   13  -2.7         214  -218   306  -307   408  -417        $ Cavity -y wall (+x)
-  211   13  -2.7         214  -215   307  -314   408  -417   108  $ Cavity inner wall (+x)
-                         vol=10324.31
-  212   13  -2.7         215   108  -110   408  -417              $ Cavity wall around chamber (+x)
-                         vol=1352.35
-  213   13  -2.7         217  -218   312  -314   408  -417        $ Cavity outer wall, +y of duct (+x)
-  214   13  -2.7         217  -218   307  -309   408  -417        $ Cavity outer wall, -y of duct (+x)
-  215   13  -2.7         217  -218   309  -312   408  -414        $ Cavity outer wall, below duct (+x)
-  216    4  -0.001205    217  -220   309  -312   414  -417        $ Air in horizontal duct (+x)
-  217   13  -2.7         218  -219   312  -313   413  -418        $ Horizontal duct +y wall (+x)
-  218   13  -2.7         218  -219   308  -309   413  -418        $ Horizontal duct -y wall (+x)
-  219   13  -2.7         218  -219   309  -312   413  -414        $ Horizontal duct bottom (+x)
-  220   13  -2.7         218  -219   309  -312   417  -418        $ Horizontal duct top (+x)
-  221    4  -0.001205    220  -221   309  -312   408  -424        $ Air in vertical duct (+x)
-  222   13  -2.7         219  -220   309  -312   408  -414        $ Vertical duct inner wall, below (+x)
-  223   13  -2.7         219  -220   309  -312   417  -424        $ Vertical duct inner wall, above (+x)
-  224   13  -2.7         221  -222   309  -312   408  -424        $ Vertical duct outer wall (+x)
-  225   13  -2.7         219  -222   312  -313   406  -424        $ Vertical duct +y wall (+x)
-  226   13  -2.7         219  -222   308  -309   406  -424        $ Vertical duct -y wall (+x)
-  227   13  -2.7         219  -222   309  -312   406  -408        $ Vertical duct bottom (+x)
+  201    4  -0.001205   216 -217  307 -314  408 -417                       $ Air in cavity, beyond cassette (+x)
+  202    4  -0.001205   215 -216  311 -314  408 -417                       $ Air in cavity, +y of cassette (+x)
+  203    4  -0.001205   215 -216  307 -310  408 -417                       $ Air in cavity, -y of cassette (+x)
+  204    4  -0.001205   215 -216  310 -311  408 -415  110  vol=38256.58    $ Air in cavity, below cassette (+x)
+  205    4  -0.001205   215 -216  310 -311  416 -417  110  vol=15292.67    $ Air in cavity, above cassette (+x)
+  206    4  -0.001205   215 -216  310 -311  415 -416  110  vol=153175.77   $ Cassette region (+x)
+  207   13  -2.7        214 -218  306 -315  406 -408  108  vol=7888.32     $ Cavity bottom (+x)
+  208   13  -2.7        214 -218  306 -315  417 -418  108  vol=7888.32     $ Cavity top (+x)
+  209   13  -2.7        214 -218  314 -315  408 -417                       $ Cavity +y wall (+x)
+  210   13  -2.7        214 -218  306 -307  408 -417                       $ Cavity -y wall (+x)
+  211   13  -2.7        214 -215  307 -314  408 -417  108  vol=10324.31    $ Cavity inner wall (+x)
+  212   13  -2.7        215  108 -110  408 -417            vol=1352.35     $ Cavity wall around chamber (+x)
+  213   13  -2.7        217 -218  312 -314  408 -417                       $ Cavity outer wall, +y of duct (+x)
+  214   13  -2.7        217 -218  307 -309  408 -417                       $ Cavity outer wall, -y of duct (+x)
+  215   13  -2.7        217 -218  309 -312  408 -414                       $ Cavity outer wall, below duct (+x)
+  216    4  -0.001205   217 -220  309 -312  414 -417                       $ Air in horizontal duct (+x)
+  217   13  -2.7        218 -219  312 -313  413 -418                       $ Horizontal duct +y wall (+x)
+  218   13  -2.7        218 -219  308 -309  413 -418                       $ Horizontal duct -y wall (+x)
+  219   13  -2.7        218 -219  309 -312  413 -414                       $ Horizontal duct bottom (+x)
+  220   13  -2.7        218 -219  309 -312  417 -418                       $ Horizontal duct top (+x)
+  221    4  -0.001205   220 -221  309 -312  408 -424                       $ Air in vertical duct (+x)
+  222   13  -2.7        219 -220  309 -312  408 -414                       $ Vertical duct inner wall, below (+x)
+  223   13  -2.7        219 -220  309 -312  417 -424                       $ Vertical duct inner wall, above (+x)
+  224   13  -2.7        221 -222  309 -312  408 -424                       $ Vertical duct outer wall (+x)
+  225   13  -2.7        219 -222  312 -313  406 -424                       $ Vertical duct +y wall (+x)
+  226   13  -2.7        219 -222  308 -309  406 -424                       $ Vertical duct -y wall (+x)
+  227   13  -2.7        219 -222  309 -312  406 -408                       $ Vertical duct bottom (+x)
 c
 c ------------------------------------------------------------------------------
 c     Water in pit
 c ------------------------------------------------------------------------------
 c
-  301  392  -0.997       205  -223   305  -316   405  -406        $ Water below everything
-  302  392  -0.997       205  -223   305  -306   406  -424        $ Water, -y side
-  303  392  -0.997       205  -223   315  -316   406  -424        $ Water, +y side
-  304  392  -0.997       205  -206   306  -315   406  -424        $ Water, -x end
-  305  392  -0.997       222  -223   306  -315   406  -424        $ Water, +x end
-  306  392  -0.997       206  -209   306  -308   406  -424        $ Water, -y of vertical duct (-x)
-  307  392  -0.997       206  -209   313  -315   406  -424        $ Water, +y of vertical duct (-x)
-  308  392  -0.997       219  -222   306  -308   406  -424        $ Water, -y of vertical duct (+x)
-  309  392  -0.997       219  -222   313  -315   406  -424        $ Water, +y of vertical duct (+x)
-  310  392  -0.997       209  -210   306  -308   406  -418        $ Water, -y of horizontal duct (-x)
-  311  392  -0.997       209  -210   313  -315   406  -418        $ Water, +y of horizontal duct (-x)
-  312  392  -0.997       209  -210   308  -313   406  -413        $ Water below horizontal duct (-x)
-  313  392  -0.997       218  -219   306  -308   406  -418        $ Water, -y of horizontal duct (+x)
-  314  392  -0.997       218  -219   313  -315   406  -418        $ Water, +y of horizontal duct (+x)
-  315  392  -0.997       218  -219   308  -313   406  -413        $ Water below horizontal duct (+x)
-  316  392  -0.997       209  -219   306  -315   418  -419   106  $ Water around target chamber
-                         vol=604207.22
-  317  392  -0.997       209  -219   306  -315   419  -422   112  $ Water around upstream tube
-                         vol=1817972.44
-  318  392  -0.997       209  -219   306  -315   422  -424   102  $ Water around beam tube
-                         vol=1894446.11
+  301  392  -0.997      205 -223  305 -316  405 -406                       $ Water below everything
+  302  392  -0.997      205 -223  305 -306  406 -424                       $ Water, -y side
+  303  392  -0.997      205 -223  315 -316  406 -424                       $ Water, +y side
+  304  392  -0.997      205 -206  306 -315  406 -424                       $ Water, -x end
+  305  392  -0.997      222 -223  306 -315  406 -424                       $ Water, +x end
+  306  392  -0.997      206 -209  306 -308  406 -424                       $ Water, -y of vertical duct (-x)
+  307  392  -0.997      206 -209  313 -315  406 -424                       $ Water, +y of vertical duct (-x)
+  308  392  -0.997      219 -222  306 -308  406 -424                       $ Water, -y of vertical duct (+x)
+  309  392  -0.997      219 -222  313 -315  406 -424                       $ Water, +y of vertical duct (+x)
+  310  392  -0.997      209 -210  306 -308  406 -418                       $ Water, -y of horizontal duct (-x)
+  311  392  -0.997      209 -210  313 -315  406 -418                       $ Water, +y of horizontal duct (-x)
+  312  392  -0.997      209 -210  308 -313  406 -413                       $ Water below horizontal duct (-x)
+  313  392  -0.997      218 -219  306 -308  406 -418                       $ Water, -y of horizontal duct (+x)
+  314  392  -0.997      218 -219  313 -315  406 -418                       $ Water, +y of horizontal duct (+x)
+  315  392  -0.997      218 -219  308 -313  406 -413                       $ Water below horizontal duct (+x)
+  316  392  -0.997      209 -219  306 -315  418 -419  106  vol=604207.22   $ Water around target chamber
+  317  392  -0.997      209 -219  306 -315  419 -422  112  vol=1817972.44  $ Water around upstream tube
+  318  392  -0.997      209 -219  306 -315  422 -424  102  vol=1894446.11  $ Water around beam tube
 c
 c ------------------------------------------------------------------------------
 c     Pit liner and air gap
 c ------------------------------------------------------------------------------
 c
-  401  331  -8.03        204  -224   304  -317   404  -405        $ Pit liner, bottom
-  402  331  -8.03        204  -224   304  -305   405  -424        $ Pit liner, -y side
-  403  331  -8.03        204  -224   316  -317   405  -424        $ Pit liner, +y side
-  404  331  -8.03        204  -205   305  -316   405  -424        $ Pit liner, -x side
-  405  331  -8.03        223  -224   305  -316   405  -424        $ Pit liner, +x side
-  411    4  -0.001205    203  -225   303  -318   403  -404        $ Air gap, bottom
-  412    4  -0.001205    203  -225   303  -304   404  -424        $ Air gap, -y side
-  413    4  -0.001205    203  -225   317  -318   404  -424        $ Air gap, +y side
-  414    4  -0.001205    203  -204   304  -317   404  -424        $ Air gap, -x side
-  415    4  -0.001205    224  -225   304  -317   404  -424        $ Air gap, +x side
+  401  331  -8.03       204 -224  304 -317  404 -405                       $ Pit liner, bottom
+  402  331  -8.03       204 -224  304 -305  405 -424                       $ Pit liner, -y side
+  403  331  -8.03       204 -224  316 -317  405 -424                       $ Pit liner, +y side
+  404  331  -8.03       204 -205  305 -316  405 -424                       $ Pit liner, -x side
+  405  331  -8.03       223 -224  305 -316  405 -424                       $ Pit liner, +x side
+  411    4  -0.001205   203 -225  303 -318  403 -404                       $ Air gap, bottom
+  412    4  -0.001205   203 -225  303 -304  404 -424                       $ Air gap, -y side
+  413    4  -0.001205   203 -225  317 -318  404 -424                       $ Air gap, +y side
+  414    4  -0.001205   203 -204  304 -317  404 -424                       $ Air gap, -x side
+  415    4  -0.001205   224 -225  304 -317  404 -424                       $ Air gap, +x side
 c
 c ------------------------------------------------------------------------------
 c     Concrete
 c ------------------------------------------------------------------------------
 c
-  501  108  -2.3         202  -226   302  -319   402  -403        $ Slab below pit
-  502  108  -2.3         202  -226   302  -303   403  -423        $ Pit wall, -y side
-  503  108  -2.3         202  -226   318  -319   403  -423        $ Pit wall, +y side
-  504  108  -2.3         202  -203   303  -318   403  -423        $ Pit wall, -x side
-  505  108  -2.3         225  -226   303  -318   403  -423        $ Pit wall, +x side
-  506  108  -2.3         201  -227   301  -303   423  -424        $ Floor, -y side
-  507  108  -2.3         201  -227   318  -320   423  -424        $ Floor, +y side
-  508  108  -2.3         201  -203   303  -318   423  -424        $ Floor, -x side
-  509  108  -2.3         225  -227   303  -318   423  -424        $ Floor, +x side
+  501  108  -2.3        202 -226  302 -319  402 -403                       $ Slab below pit
+  502  108  -2.3        202 -226  302 -303  403 -423                       $ Pit wall, -y side
+  503  108  -2.3        202 -226  318 -319  403 -423                       $ Pit wall, +y side
+  504  108  -2.3        202 -203  303 -318  403 -423                       $ Pit wall, -x side
+  505  108  -2.3        225 -226  303 -318  403 -423                       $ Pit wall, +x side
+  506  108  -2.3        201 -227  301 -303  423 -424                       $ Floor, -y side
+  507  108  -2.3        201 -227  318 -320  423 -424                       $ Floor, +y side
+  508  108  -2.3        201 -203  303 -318  423 -424                       $ Floor, -x side
+  509  108  -2.3        225 -227  303 -318  423 -424                       $ Floor, +x side
 c
 c ------------------------------------------------------------------------------
 c     Earth
 c ------------------------------------------------------------------------------
 c
-  601  116  -1.52        201  -227   301  -320   401  -402        $ Earth below slab
-  602  116  -1.52        201  -227   301  -302   402  -423        $ Earth beside pit walls, -y side
-  603  116  -1.52        201  -227   319  -320   402  -423        $ Earth beside pit walls, +y side
-  604  116  -1.52        201  -202   302  -319   402  -423        $ Earth beside pit walls, -x side
-  605  116  -1.52        226  -227   302  -319   402  -423        $ Earth beside pit walls, +x side
+  601  116  -1.52       201 -227  301 -320  401 -402                       $ Earth below slab
+  602  116  -1.52       201 -227  301 -302  402 -423                       $ Earth beside pit walls, -y side
+  603  116  -1.52       201 -227  319 -320  402 -423                       $ Earth beside pit walls, +y side
+  604  116  -1.52       201 -202  302 -319  402 -423                       $ Earth beside pit walls, -x side
+  605  116  -1.52       226 -227  302 -319  402 -423                       $ Earth beside pit walls, +x side
 c
 c ------------------------------------------------------------------------------
 c     Air above ground
 c ------------------------------------------------------------------------------
 c
-  701    4  -0.001205    201  -227   301  -320   424  -425        $ Air above ground
+  701    4  -0.001205   201 -227  301 -320  424 -425                       $ Air above ground
 c
 c ------------------------------------------------------------------------------
 c     Outside the model
 c ------------------------------------------------------------------------------
 c
-  999    0             (-201:227:-301:320:-401:425)               $ Rest of universe
+  999    0             (-201:227:-301:320:-401:425)                        $ Rest of universe
 
 c ******************************************************************************
 c
@@ -231,18 +210,18 @@ c ------------------------------------------------------------------------------
 c     Cylinders parallel to z
 c ------------------------------------------------------------------------------
 c
-  101  cz                       3.96240  $ Beam tube
-  102  cz                       4.59740  $ Beam tube
-  103  cz                       5.44830  $ Target chamber inner radius
-  104  cz                       5.72770  $ Target chamber inner wall
-  105  cz                       5.86740  $ Cooling water jacket
-  106  cz                       6.09600  $ Target chamber outer wall
-  107  c/z  -0.47752  0.00000   6.40969  $ Water around the target chamber in the cavity (-x)
-  108  c/z   0.47752  0.00000   6.40969  $ Water around the target chamber in the cavity (+x)
-  109  c/z  -0.47752  0.00000   7.06501  $ Cavity wall around the target chamber (-x)
-  110  c/z   0.47752  0.00000   7.06501  $ Cavity wall around the target chamber (+x)
-  111  cz                      12.06500  $ Upstream tube
-  112  cz                      12.70000  $ Upstream tube
+  101  cz                         3.96240  $ Beam tube
+  102  cz                         4.59740  $ Beam tube
+  103  cz                         5.44830  $ Target chamber inner radius
+  104  cz                         5.72770  $ Target chamber inner wall
+  105  cz                         5.86740  $ Cooling water jacket
+  106  cz                         6.09600  $ Target chamber outer wall
+  107  c/z  -0.47752  0.00000     6.40969  $ Water around the target chamber in the cavity (-x)
+  108  c/z   0.47752  0.00000     6.40969  $ Water around the target chamber in the cavity (+x)
+  109  c/z  -0.47752  0.00000     7.06501  $ Cavity wall around the target chamber (-x)
+  110  c/z   0.47752  0.00000     7.06501  $ Cavity wall around the target chamber (+x)
+  111  cz                        12.06500  $ Upstream tube
+  112  cz                        12.70000  $ Upstream tube
 c
 c ------------------------------------------------------------------------------
 c     Planes normal to x
