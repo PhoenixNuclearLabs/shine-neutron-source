@@ -132,7 +132,6 @@ SHINE = {
     "dark gray": "#53565A",
     "mid gray": "#B1B3B3",
     "light gray": "#CCCCCC",
-    "ink": "#001027",
 }
 SPECTRUM_COLORS = {
     "peak": {"MCNP": SHINE["dark blue"], "OpenMC": SHINE["shine blue"]},
@@ -506,19 +505,12 @@ def plot_spectra(results):
                 )
         ax.set_xscale("log")
         ax.set_yscale("log")
-        ax.set_xlabel(f"{particle.capitalize()} energy [MeV]", color=SHINE["dark gray"])
+        ax.set_xlabel(f"{particle.capitalize()} energy [MeV]")
         ax.set_ylabel(
             f"{particle.capitalize()} flux per unit lethargy "
-            f"[{'n' if particle == 'neutron' else '$\\gamma$'}/cm$^2$-s]",
-            color=SHINE["dark gray"],
+            f"[{'n' if particle == 'neutron' else '$\\gamma$'}/cm$^2$-s]"
         )
-        ax.set_title(
-            f"Artemis: {particle} spectrum in the cassette regions (mean of -x and +x)",
-            color=SHINE["ink"],
-        )
-        ax.tick_params(which="both", colors=SHINE["dark gray"])
-        for spine in ax.spines.values():
-            spine.set_color(SHINE["dark gray"])
+        ax.set_title(f"Artemis: {particle} spectrum in the cassette regions (mean of -x and +x)")
         ax.grid(which="major", color=SHINE["light gray"], linewidth=0.6)
         ax.set_axisbelow(True)
         ax.legend(loc="upper left")
