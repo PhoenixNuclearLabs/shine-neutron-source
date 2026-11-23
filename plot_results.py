@@ -43,39 +43,47 @@ import warnings
 import matplotlib
 import numpy as np
 
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 from matplotlib import pyplot as plt  # noqa: E402
 from matplotlib.colors import LogNorm, Normalize  # noqa: E402
 from matplotlib.ticker import MultipleLocator  # noqa: E402
 
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['mathtext.default'] = 'regular'
+plt.rcParams["font.family"] = "serif"
+plt.rcParams["mathtext.default"] = "regular"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-MCNP_DIR = os.path.join(HERE, 'mcnp')
-OPENMC_DIR = os.path.join(HERE, 'openmc')
-IMAGES_DIR = os.path.join(HERE, 'images')
+MCNP_DIR = os.path.join(HERE, "mcnp")
+OPENMC_DIR = os.path.join(HERE, "openmc")
+IMAGES_DIR = os.path.join(HERE, "images")
 
 CASSETTE_CELLS = [106, 206]
-SPECTRUM_TALLIES = {'neutron': 14, 'photon': 24}
+SPECTRUM_TALLIES = {"neutron": 14, "photon": 24}
 
 # Mesh tallies: one for each plane and view, neutrons then photons
-PLANES = ['xy', 'xz']
-VIEWS = ['pit', 'cavity']
-MESH_TALLIES = {(particle, plane, view): 34 + 10 * ((k * len(VIEWS) + m) * len(PLANES) + n)
-                for k, particle in enumerate(['neutron', 'photon'])
-                for m, view in enumerate(VIEWS) for n, plane in enumerate(PLANES)}
+PLANES = ["xy", "xz"]
+VIEWS = ["pit", "cavity"]
+MESH_TALLIES = {
+    (particle, plane, view): 34 + 10 * ((k * len(VIEWS) + m) * len(PLANES) + n)
+    for k, particle in enumerate(["neutron", "photon"])
+    for m, view in enumerate(VIEWS)
+    for n, plane in enumerate(PLANES)
+}
 
 # Energy groups of the neutron mesh tallies (emesh in the MCNP deck, an energy filter in the
 # OpenMC model): name (in the file names) and title of each, in order of energy
-NEUTRON_GROUPS = [('thermal', 'below 0.5 eV'), ('epithermal', 'from 0.5 eV to 0.1 MeV'),
-                  ('fast', 'from 0.1 to 10 MeV'), ('high', 'above 10 MeV')]
+NEUTRON_GROUPS = [
+    ("thermal", "below 0.5 eV"),
+    ("epithermal", "from 0.5 eV to 0.1 MeV"),
+    ("fast", "from 0.1 to 10 MeV"),
+    ("high", "above 10 MeV"),
+]
 GROUP = {name: g for g, (name, _) in enumerate(NEUTRON_GROUPS)}
 
 # Flux figures: (particle, energy group (None for all energies), view, color scale (type, vmin,
 # vmax; None for the maximum), axis tick spacing [cm]). Log scales: the flux falls by orders of
 # magnitude from the source in the chamber to the cassettes (cavity views) and through the water
 # (pit views)
+# fmt: off
 FIGURES = [
     ('neutron', None        , 'pit'   , ('log', 1e6, None), 100),
     ('neutron', None        , 'cavity', ('log', 1e8, None), 20),
@@ -90,25 +98,60 @@ FIGURES = [
     ('photon' , None        , 'pit'   , ('log', 1e6, None), 100),
     ('photon' , None        , 'cavity', ('log', 1e8, None), 20),
 ]
-UNITS = {'neutron': 'n/cm$^2$-s', 'photon': r'$\gamma$/cm$^2$-s'}
+# fmt: on
+UNITS = {"neutron": "n/cm$^2$-s", "photon": r"$\gamma$/cm$^2$-s"}
 
 # Contour levels on log scales, in each decade: 1 and 3 for the whole-geometry (pit) views, and 1, 2,
 # and 5 for the closer cavity views (linear scales have them at the colorbar ticks)
-CONTOUR_STEPS = {'pit': [1, 3], 'cavity': [1, 2, 5]}
+CONTOUR_STEPS = {"pit": [1, 3], "cavity": [1, 2, 5]}
 
 # Contour line colors: the first N colors of CONTOUR_COLORS_2 (N = number of contour levels), in the
 # order they appear in CONTOUR_COLORS_1
-CONTOUR_COLORS_1 = ['w', 'gold', 'r', 'b', 'g', 'm', 'c', 'darkred', 'darkblue', 'darkgreen',
-                    'purple', 'darkcyan', 'dodgerblue', 'yellow', 'lime', 'aqua', 'ivory']
-CONTOUR_COLORS_2 = ['r', 'b', 'g', 'yellow', 'w', 'm', 'darkblue', 'aqua', 'gold', 'darkred', 'c',
-                    'darkgreen', 'purple', 'lime', 'darkcyan', 'ivory', 'dodgerblue']
+CONTOUR_COLORS_1 = [
+    "w",
+    "gold",
+    "r",
+    "b",
+    "g",
+    "m",
+    "c",
+    "darkred",
+    "darkblue",
+    "darkgreen",
+    "purple",
+    "darkcyan",
+    "dodgerblue",
+    "yellow",
+    "lime",
+    "aqua",
+    "ivory",
+]
+CONTOUR_COLORS_2 = [
+    "r",
+    "b",
+    "g",
+    "yellow",
+    "w",
+    "m",
+    "darkblue",
+    "aqua",
+    "gold",
+    "darkred",
+    "c",
+    "darkgreen",
+    "purple",
+    "lime",
+    "darkcyan",
+    "ivory",
+    "dodgerblue",
+]
 
 
 def power_of_ten(x):
     """A contour label in the colorbar's style: 2×10⁸ (10⁹ for 1×10⁹), in mathtext."""
-    mantissa, exponent = f'{x:.2e}'.split('e')
-    mantissa, exponent = f'{float(mantissa):g}', int(exponent)
-    return f'$10^{{{exponent}}}$' if mantissa == '1' else f'${mantissa}\\times10^{{{exponent}}}$'
+    mantissa, exponent = f"{x:.2e}".split("e")
+    mantissa, exponent = f"{float(mantissa):g}", int(exponent)
+    return f"$10^{{{exponent}}}$" if mantissa == "1" else f"${mantissa}\\times10^{{{exponent}}}$"
 
 
 def contour_colors(n):
@@ -122,19 +165,24 @@ def contour_colors(n):
 class MCNPResults:
     """MCNP results: the mctal (spectra) and meshtal (mesh tallies) files of mcnp6 n=artemis.i."""
 
-    name = 'MCNP'
+    name = "MCNP"
 
     def __init__(self):
         import mcnptools
-        self.mctal = mcnptools.Mctal(os.path.join(MCNP_DIR, 'artemis.im'))
-        self.meshtal = mcnptools.Meshtal(os.path.join(MCNP_DIR, 'artemis.imsht'))
+
+        self.mctal = mcnptools.Mctal(os.path.join(MCNP_DIR, "artemis.im"))
+        self.meshtal = mcnptools.Meshtal(os.path.join(MCNP_DIR, "artemis.imsht"))
 
     def spectrum(self, particle):
         """Return (energy edges [MeV], flux in each bin [/cm^2-s]), the mean of the cassettes."""
         t = self.mctal.GetTally(SPECTRUM_TALLIES[particle])
         upper = np.array(t.GetEBins())  # upper edges; the first is the top of a bin from 0
-        flux = np.array([[t.GetValue(c, 0, 0, 0, 0, 0, e, 0) for e in range(len(upper))]
-                         for c in range(len(CASSETTE_CELLS))]).mean(axis=0)
+        flux = np.array(
+            [
+                [t.GetValue(c, 0, 0, 0, 0, 0, e, 0) for e in range(len(upper))]
+                for c in range(len(CASSETTE_CELLS))
+            ]
+        ).mean(axis=0)
         return upper, flux[1:]
 
     def mesh(self, particle, plane, view):
@@ -143,37 +191,48 @@ class MCNPResults:
         t = self.meshtal.GetTally(MESH_TALLIES[particle, plane, view])
         edges = [np.array(t.GetXRBounds()), np.array(t.GetYZBounds()), np.array(t.GetZTBounds())]
         shape = [len(e) - 1 for e in edges] + [len(t.GetEBounds()) - 1]
-        flux = np.array([[[[t.GetValue(i, j, k, e) for e in range(shape[3])]
-                           for k in range(shape[2])] for j in range(shape[1])]
-                         for i in range(shape[0])])
+        flux = np.array(
+            [
+                [
+                    [[t.GetValue(i, j, k, e) for e in range(shape[3])] for k in range(shape[2])]
+                    for j in range(shape[1])
+                ]
+                for i in range(shape[0])
+            ]
+        )
         return edges, flux
 
 
 class OpenMCResults:
     """OpenMC results: the latest statepoint in openmc/, with the volumes of the model's cells."""
 
-    name = 'OpenMC'
+    name = "OpenMC"
 
     def __init__(self):
         import openmc
-        files = sorted(glob.glob(os.path.join(OPENMC_DIR, 'statepoint.*.h5')),
-                       key=lambda f: int(f.split('.')[-2]))
+
+        files = sorted(
+            glob.glob(os.path.join(OPENMC_DIR, "statepoint.*.h5")),
+            key=lambda f: int(f.split(".")[-2]),
+        )
         if not files:
-            raise SystemExit(f'No statepoint in {OPENMC_DIR}: run openmc/artemis.py first')
+            raise SystemExit(f"No statepoint in {OPENMC_DIR}: run openmc/artemis.py first")
         self.statepoint = openmc.StatePoint(files[-1])
         # Cell volumes, from the model (the tallies hold track lengths, not fluxes)
         sys.path.insert(0, OPENMC_DIR)
         import artemis
+
         # The statepoint's summary has already made the model's materials, surfaces, and cells:
         # making them again warns that their IDs are in use
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', openmc.IDWarning)
+            warnings.simplefilter("ignore", openmc.IDWarning)
             cells = artemis.get_geometry(artemis.get_materials()).get_all_cells()
         self.volumes = [cells[c].volume for c in CASSETTE_CELLS]
 
     def spectrum(self, particle):
         """Return (energy edges [MeV], flux in each bin [/cm^2-s]), the mean of the cassettes."""
         import openmc
+
         t = self.statepoint.get_tally(id=SPECTRUM_TALLIES[particle])
         edges = t.find_filter(openmc.EnergyFilter).values * 1e-6
         track = t.mean.reshape(len(CASSETTE_CELLS), -1)
@@ -183,13 +242,17 @@ class OpenMCResults:
         """Return (edges along x, y, and z [cm], flux[x, y, z, energy group] [/cm^2-s]) of a mesh
         tally."""
         import openmc
+
         t = self.statepoint.get_tally(id=MESH_TALLIES[particle, plane, view])
         mesh = t.find_filter(openmc.MeshFilter).mesh
         nx, ny, nz = mesh.dimension
-        edges = [np.linspace(lo, hi, n + 1)
-                 for lo, hi, n in zip(mesh.lower_left, mesh.upper_right, mesh.dimension)]
-        volume = np.prod((np.array(mesh.upper_right) - np.array(mesh.lower_left))
-                         / np.array(mesh.dimension))
+        edges = [
+            np.linspace(lo, hi, n + 1)
+            for lo, hi, n in zip(mesh.lower_left, mesh.upper_right, mesh.dimension)
+        ]
+        volume = np.prod(
+            (np.array(mesh.upper_right) - np.array(mesh.lower_left)) / np.array(mesh.dimension)
+        )
         # The filters are mesh, particle, and energy (if any), the last varying fastest; mesh bins
         # run with x fastest, then y, then z
         flux = t.mean.ravel().reshape(nz, ny, nx, -1).transpose(2, 1, 0, 3) / volume
@@ -201,7 +264,7 @@ def in_plane(edges, flux, plane, group):
     panel's extent and its flux in one energy group (the sum of them all for None), with rows along
     the plane's vertical axis."""
     flux = flux.sum(axis=3) if group is None else flux[:, :, :, GROUP[group]]
-    h, v = 'xyz'.index(plane[0]), 'xyz'.index(plane[1])
+    h, v = "xyz".index(plane[0]), "xyz".index(plane[1])
     flux = np.take(flux, 0, axis=3 - h - v)
     return [edges[h][0], edges[h][-1], edges[v][0], edges[v][-1]], flux.T
 
@@ -213,7 +276,7 @@ def geometry_edges(plane, view, width=1):
     """Material boundaries from the OpenMC geometry plot of a window, as an RGBA image (black where
     neighboring pixels differ in color), or None if there is no plot. The edges are widened by width
     pixels on each side, so they stay dark when the image is shrunk to the panel size."""
-    filename = os.path.join(IMAGES_DIR, f'artemis_openmc_geom_{plane}_{view}.png')
+    filename = os.path.join(IMAGES_DIR, f"artemis_openmc_geom_{plane}_{view}.png")
     if not os.path.exists(filename):
         return None
     img = plt.imread(filename)[:, :, :3]
@@ -243,31 +306,38 @@ def plot_flux(results):
                 if key not in tallies:
                     tallies[key] = r.mesh(particle, plane, view)
                 maps[r.name].append(in_plane(*tallies[key], plane, group))
-        title = f'{particle.capitalize()} flux'
+        title = f"{particle.capitalize()} flux"
         if group is not None:
-            title += ' ' + dict(NEUTRON_GROUPS)[group]
-        if view == 'cavity':
-            title += ' (cavities)'
+            title += " " + dict(NEUTRON_GROUPS)[group]
+        if view == "cavity":
+            title += " (cavities)"
         units = UNITS[particle]
-        suffix = view if group is None else f'{group}_{view}'
+        suffix = view if group is None else f"{group}_{view}"
         top = max(np.max(flux) for panels in maps.values() for _, flux in panels)
-        norm = (LogNorm if scale == 'log' else Normalize)(vmin, top if vmax is None else vmax)
+        norm = (LogNorm if scale == "log" else Normalize)(vmin, top if vmax is None else vmax)
         for name, panels in maps.items():
             # The panels all have the same height, each with its own aspect ratio
             height = 3.0  # [in]
             widths = [height * (e[1] - e[0]) / (e[3] - e[2]) for e, _ in panels]
             figsize = (sum(widths) + 0.6 * len(panels) + 0.9, height + 1.3)
-            fig, axs = plt.subplots(1, len(panels), figsize=figsize, layout='constrained',
-                                    width_ratios=widths)
+            fig, axs = plt.subplots(
+                1, len(panels), figsize=figsize, layout="constrained", width_ratios=widths
+            )
             for ax, plane, (extent, flux) in zip(axs, PLANES, panels):
-                im = ax.imshow(np.maximum(flux, norm.vmin), origin='lower', extent=extent,
-                               norm=norm, cmap='Spectral_r', interpolation='nearest')
+                im = ax.imshow(
+                    np.maximum(flux, norm.vmin),
+                    origin="lower",
+                    extent=extent,
+                    norm=norm,
+                    cmap="Spectral_r",
+                    interpolation="nearest",
+                )
                 edges = geometry_edges(plane, view)
                 if edges is not None:
-                    ax.imshow(edges, origin='upper', extent=extent)
-                ax.set_title(f'{plane} plane')
-                ax.set_xlabel(f'{plane[0]} [cm]')
-                ax.set_ylabel(f'{plane[1]} [cm]')
+                    ax.imshow(edges, origin="upper", extent=extent)
+                ax.set_title(f"{plane} plane")
+                ax.set_xlabel(f"{plane[0]} [cm]")
+                ax.set_ylabel(f"{plane[1]} [cm]")
                 ax.xaxis.set_major_locator(MultipleLocator(tick))
                 ax.yaxis.set_major_locator(MultipleLocator(tick))
             cbar = fig.colorbar(im, ax=axs, label=units, shrink=0.8, pad=0.01)
@@ -275,54 +345,66 @@ def plot_flux(results):
             # Contour lines at CONTOUR_STEPS (not including the ends of the scale), one color per
             # level, the same in every panel, drawn on the colorbar too, and labeled with their
             # values
-            if scale == 'log':
-                decades = range(int(np.floor(np.log10(norm.vmin))),
-                                int(np.ceil(np.log10(norm.vmax))) + 1)
+            if scale == "log":
+                decades = range(
+                    int(np.floor(np.log10(norm.vmin))), int(np.ceil(np.log10(norm.vmax))) + 1
+                )
                 levels = [step * 10.0**d for d in decades for step in CONTOUR_STEPS[view]]
             else:
                 levels = cbar.get_ticks()
             levels = [x for x in levels if norm.vmin < x < norm.vmax]
-            levels = levels[:len(CONTOUR_COLORS_2)]
+            levels = levels[: len(CONTOUR_COLORS_2)]
             colors = contour_colors(len(levels))
             for ax, (extent, flux) in zip(axs, panels if levels else []):
-                cs = ax.contour(flux, levels=levels, colors=colors, linewidths=0.8, origin='lower',
-                                extent=extent)
+                cs = ax.contour(
+                    flux,
+                    levels=levels,
+                    colors=colors,
+                    linewidths=0.8,
+                    origin="lower",
+                    extent=extent,
+                )
                 ax.clabel(cs, fontsize=6, fmt=power_of_ten)
             if levels:
                 cbar.add_lines(cs)
-            fig.suptitle(f'Artemis: {title}, {name}')
+            fig.suptitle(f"Artemis: {title}, {name}")
             fig.get_layout_engine().set(h_pad=0.2, wspace=0)
-            save(fig, f'artemis_{name.lower()}_{particle}_flux_{suffix}.png', indexed=True)
+            save(fig, f"artemis_{name.lower()}_{particle}_flux_{suffix}.png", indexed=True)
 
 
 def plot_spectra(results):
     """The cassette spectra, per unit lethargy, with every code on the same axes."""
-    for particle in ['neutron', 'photon']:
-        fig, ax = plt.subplots(figsize=(8, 6), layout='constrained')
+    for particle in ["neutron", "photon"]:
+        fig, ax = plt.subplots(figsize=(8, 6), layout="constrained")
         for r in results:
             edges, flux = r.spectrum(particle)
             ax.stairs(flux / np.log(edges[1:] / edges[:-1]), edges, label=r.name)
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.set_xlabel(f'{particle.capitalize()} energy [MeV]')
-        ax.set_ylabel(f'{particle.capitalize()} flux per unit lethargy '
-                      f'[{"n" if particle == "neutron" else "$\\gamma$"}/cm$^2$-s]')
-        ax.set_title(f'Artemis: {particle} spectrum in the cassette regions '
-                     f'(mean of cells {CASSETTE_CELLS[0]} and {CASSETTE_CELLS[1]})')
-        ax.grid(which='major', alpha=0.4)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlabel(f"{particle.capitalize()} energy [MeV]")
+        ax.set_ylabel(
+            f"{particle.capitalize()} flux per unit lethargy "
+            f"[{'n' if particle == 'neutron' else '$\\gamma$'}/cm$^2$-s]"
+        )
+        ax.set_title(
+            f"Artemis: {particle} spectrum in the cassette regions "
+            f"(mean of cells {CASSETTE_CELLS[0]} and {CASSETTE_CELLS[1]})"
+        )
+        ax.grid(which="major", alpha=0.4)
         ax.legend()
-        save(fig, f'artemis_spectrum_{particle}.png')
+        save(fig, f"artemis_spectrum_{particle}.png")
 
 
 def save(fig, name, indexed=False):
     """Save a figure in images/, at 150 dpi; indexed: as a 256-color indexed PNG (about a quarter
     the size of a full-color one, and looks the same: the colormap has 256 colors)."""
     from PIL import Image
+
     filename = os.path.join(IMAGES_DIR, name)
     buf = io.BytesIO()
-    fig.savefig(buf, format='png', dpi=150)
+    fig.savefig(buf, format="png", dpi=150)
     plt.close(fig)
-    image = Image.open(buf).convert('RGB')
+    image = Image.open(buf).convert("RGB")
     if indexed:
         image = image.quantize(256, method=Image.Quantize.FASTOCTREE, dither=Image.Dither.NONE)
     # On Windows, another program (an editor's preview, antivirus) can hold the file for a moment
@@ -334,13 +416,13 @@ def save(fig, name, indexed=False):
             if attempt == 4:
                 raise
             time.sleep(1)
-    print('Wrote', os.path.relpath(filename, HERE))
+    print("Wrote", os.path.relpath(filename, HERE))
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    parser.add_argument('--mcnp', action='store_true', help='MCNP results only')
-    parser.add_argument('--openmc', action='store_true', help='OpenMC results only')
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("--mcnp", action="store_true", help="MCNP results only")
+    parser.add_argument("--openmc", action="store_true", help="OpenMC results only")
     args = parser.parse_args()
     both = not (args.mcnp or args.openmc)
 
@@ -353,5 +435,5 @@ def main():
     plot_flux(results)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

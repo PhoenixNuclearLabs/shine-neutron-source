@@ -44,17 +44,19 @@ import re
 import h5py
 import matplotlib.colors
 import numpy as np
-import openmc
 from beamtarget.openmc_source import get_openmc_sources
 
+import openmc
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-SOURCE_H5 = os.path.join(HERE, '..', 'source', 'Artemis', 'source.h5')
-MCNP_DIR = os.path.join(HERE, '..', 'mcnp')
-IMAGES_DIR = os.path.join(HERE, '..', 'images')
+SOURCE_H5 = os.path.join(HERE, "..", "source", "Artemis", "source.h5")
+MCNP_DIR = os.path.join(HERE, "..", "mcnp")
+IMAGES_DIR = os.path.join(HERE, "..", "images")
 
 # ------------------------------------------------------------------------------
 # Dimensions [cm]
 # ------------------------------------------------------------------------------
+# fmt: off
 GROUND = 289.56
 Z_ROOF = round(GROUND + 462.28, 5)       # top of the air above ground
 
@@ -95,6 +97,7 @@ EARTH_T = 3 * 30.48                      # earth: 3 ft thick beside and below th
 XE, YE = XW + EARTH_T, YW + EARTH_T      # floor and earth
 Z_SLAB, Z_GAP, Z_LINER, Z_PIT, Z_FLOOR = -208.28, -177.8, -167.64, -167.2971, 269.24
 Z_EARTH = round(Z_SLAB - EARTH_T, 5)
+# fmt: on
 
 # ------------------------------------------------------------------------------
 # Materials from the PNNL compendium of material compositions (PNNL-15870), as in the MCNP model:
@@ -103,6 +106,7 @@ Z_EARTH = round(Z_SLAB - EARTH_T, 5)
 COMPENDIUM = {}
 
 # Air (dry, near sea level), rho = 0.001205 g/cm^3
+# fmt: off
 COMPENDIUM[4] = ('Air (dry, near sea level)', 0.001205, None, [
     ('C12', 1.4858312730e-04), ('C13', 1.6070347337e-06), ('N14', 7.8157536121e-01),
     ('N15', 2.8553277076e-03), ('O16', 2.1023586223e-01), ('O17', 8.0084232333e-05),
@@ -168,15 +172,16 @@ COMPENDIUM[392] = ('Water, Liquid (H2O)', 0.997, 'c_H_in_H2O', [
     ('H1', 6.6659000000e-01), ('H2', 7.6666666667e-05), ('O16', 3.3252333333e-01),
     ('O17', 1.2666666667e-04), ('O18', 6.8333333333e-04),
 ])
+# fmt: on
 
 
 def check_source(fname_h5):
     """Check that the source was made for this target chamber."""
-    with h5py.File(fname_h5, 'r') as hf:
-        assert hf['inputs']['wall_radius'].attrs['units'] == 'cm'
-        radius = float(hf['inputs']['wall_radius'][0])
-        assert np.isclose(radius, R_BORE), f'{fname_h5} has wall_radius {radius} cm'
-        assert np.allclose(hf.attrs['backstop_position'], 0.0)
+    with h5py.File(fname_h5, "r") as hf:
+        assert hf["inputs"]["wall_radius"].attrs["units"] == "cm"
+        radius = float(hf["inputs"]["wall_radius"][0])
+        assert np.isclose(radius, R_BORE), f"{fname_h5} has wall_radius {radius} cm"
+        assert np.allclose(hf.attrs["backstop_position"], 0.0)
 
 
 def get_materials():
@@ -185,8 +190,8 @@ def get_materials():
     for number, (name, density, sab, nuclides) in COMPENDIUM.items():
         mat = openmc.Material(number, name)
         for nuclide, fraction in nuclides:
-            mat.add_nuclide(nuclide, fraction, 'ao')
-        mat.set_density('g/cm3', density)
+            mat.add_nuclide(nuclide, fraction, "ao")
+        mat.set_density("g/cm3", density)
         if sab is not None:
             mat.add_s_alpha_beta(sab)
         mats[number] = mat
@@ -201,25 +206,69 @@ def get_surfaces():
     x_planes = [XC1, XCS, XCI, XCO, XVO0, XVI0, XVI1, XVO1, XP, XL, XA, XW, XE]
     y_planes = [YCS, YDI, YDO, YCI, YCO, YP, YL, YA, YW, YE]
     groups = [
-        ('cz', 101, [R_BEAM_IN, R_BEAM_OUT, R_BORE, R_WALL_1, R_WATER, R_WALL_2, R_GAP,
-                     R_CAV_WALL, R_UP_IN, R_UP_OUT]),
-        ('px', 201, [XC0] + x_planes + [-v for v in x_planes]),
-        ('py', 301, y_planes + [-v for v in y_planes]),
-        ('pz', 401, [Z_EARTH, Z_SLAB, Z_GAP, Z_LINER, Z_PIT, Z_CAV0, Z_END, Z_AIR0, Z_END_TOP,
-                     Z_PLATE, Z_STOP, 0.0, Z_HD0_OUT, Z_HD0, Z_CAS0, Z_CAS1, Z_AIR1, Z_CAV1,
-                     Z_WALLS, Z_UP0, Z_UP1, Z_UP2, Z_FLOOR, GROUND, Z_ROOF]),
+        (
+            "cz",
+            101,
+            [
+                R_BEAM_IN,
+                R_BEAM_OUT,
+                R_BORE,
+                R_WALL_1,
+                R_WATER,
+                R_WALL_2,
+                R_GAP,
+                R_CAV_WALL,
+                R_UP_IN,
+                R_UP_OUT,
+            ],
+        ),
+        ("px", 201, [XC0] + x_planes + [-v for v in x_planes]),
+        ("py", 301, y_planes + [-v for v in y_planes]),
+        (
+            "pz",
+            401,
+            [
+                Z_EARTH,
+                Z_SLAB,
+                Z_GAP,
+                Z_LINER,
+                Z_PIT,
+                Z_CAV0,
+                Z_END,
+                Z_AIR0,
+                Z_END_TOP,
+                Z_PLATE,
+                Z_STOP,
+                0.0,
+                Z_HD0_OUT,
+                Z_HD0,
+                Z_CAS0,
+                Z_CAS1,
+                Z_AIR1,
+                Z_CAV1,
+                Z_WALLS,
+                Z_UP0,
+                Z_UP1,
+                Z_UP2,
+                Z_FLOOR,
+                GROUND,
+                Z_ROOF,
+            ],
+        ),
     ]
-    make = {'cz': lambda n, v: openmc.ZCylinder(surface_id=n, r=v),
-            'px': lambda n, v: openmc.XPlane(surface_id=n, x0=v),
-            'py': lambda n, v: openmc.YPlane(surface_id=n, y0=v),
-            'pz': lambda n, v: openmc.ZPlane(surface_id=n, z0=v)}
+    make = {
+        "cz": lambda n, v: openmc.ZCylinder(surface_id=n, r=v),
+        "px": lambda n, v: openmc.XPlane(surface_id=n, x0=v),
+        "py": lambda n, v: openmc.YPlane(surface_id=n, y0=v),
+        "pz": lambda n, v: openmc.ZPlane(surface_id=n, z0=v),
+    }
     surfaces = {}
     for kind, start, values in groups:
         for n, v in enumerate(sorted(set(values)), start=start):
             surfaces[kind, v] = make[kind](n, v)
     # Outer surfaces of the model: vacuum boundaries (MCNP: the importance-0 cell 999 outside)
-    for key in [('px', -XE), ('px', XE), ('py', -YE), ('py', YE), ('pz', Z_EARTH), ('pz', Z_ROOF)]:
-        surfaces[key].boundary_type = 'vacuum'
+    for key in [("px", -XE), ("px", XE), ("py", -YE), ("py", YE), ("pz", Z_EARTH), ("pz", Z_ROOF)]:
+        surfaces[key].boundary_type = "vacuum"
     return surfaces
 
 
@@ -227,6 +276,7 @@ def get_surfaces():
 VOID, CU, SS, H2O, AIR, AL, CONC, EARTH = None, 112, 331, 392, 4, 13, 108, 116
 
 # Target chamber and upstream section: cylindrical shells (inside r1 only, if r0 is None)
+# fmt: off
 CHAMBER_CELLS = [
     ( 1, VOID, None,       R_BORE,     0.0,       Z_UP0,     'Vacuum in target chamber'),
     ( 2, CU,   None,       R_BORE,     Z_STOP,    0.0,       'Copper beam stop'),
@@ -245,6 +295,7 @@ CHAMBER_CELLS = [
     (15, H2O,  R_WALL_2,   R_GAP,      Z_END,     Z_CAV1,    'Water between chamber and cavities'),
     (16, H2O,  None,       R_GAP,      Z_CAV0,    Z_END,     'Water below chamber, in cavities'),
 ]
+# fmt: on
 
 
 # ------------------------------------------------------------------------------
@@ -256,13 +307,14 @@ def get_geometry(mats):
     cells = []
 
     def box(x0, x1, y0, y1, z0, z1):
-        return (+S['px', x0] & -S['px', x1] & +S['py', y0] & -S['py', y1]
-                & +S['pz', z0] & -S['pz', z1])
+        return (
+            +S["px", x0] & -S["px", x1] & +S["py", y0] & -S["py", y1] & +S["pz", z0] & -S["pz", z1]
+        )
 
     def tube(r0, r1, z0, z1):
         """Between two cylinders (r0 = None: inside r1), from z0 to z1."""
-        region = -S['cz', r1] & +S['pz', z0] & -S['pz', z1]
-        return region if r0 is None else +S['cz', r0] & region
+        region = -S["cz", r1] & +S["pz", z0] & -S["pz", z1]
+        return region if r0 is None else +S["cz", r0] & region
 
     def cell(number, mat, region, name):
         fill = None if mat is None else mats[mat]
@@ -281,10 +333,11 @@ def get_geometry(mats):
             return box(x0, x1, y0, y1, z0, z1)
 
         def cl(i, mat, region, name):
-            cell(base + i, mat, region, f'{name} ({tag})')
+            cell(base + i, mat, region, f"{name} ({tag})")
 
-        out_gap, out_wall = +S['cz', R_GAP], +S['cz', R_CAV_WALL]
-        inner_x = +S['px', XC1] if sign > 0 else -S['px', -XC1]
+        out_gap, out_wall = +S["cz", R_GAP], +S["cz", R_CAV_WALL]
+        inner_x = +S["px", XC1] if sign > 0 else -S["px", -XC1]
+        # fmt: off
         cl( 1, AIR, b(XCS, XCI, -YCI, YCI, Z_AIR0, Z_AIR1), 'Air in cavity, beyond cassette')
         cl( 2, AIR, b(XC1, XCS, YCS, YCI, Z_AIR0, Z_AIR1), 'Air in cavity, +y of cassette')
         cl( 3, AIR, b(XC1, XCS, -YCI, -YCS, Z_AIR0, Z_AIR1), 'Air in cavity, -y of cassette')
@@ -314,69 +367,76 @@ def get_geometry(mats):
         cl(25, AL,  b(XVO0, XVO1, YDI, YDO, Z_CAV0, GROUND), 'Vertical duct +y wall')
         cl(26, AL,  b(XVO0, XVO1, -YDO, -YDI, Z_CAV0, GROUND), 'Vertical duct -y wall')
         cl(27, AL,  b(XVO0, XVO1, -YDI, YDI, Z_CAV0, Z_AIR0), 'Vertical duct bottom')
+        # fmt: on
 
-    side(-1, 100, '-x')
-    side(+1, 200, '+x')
+    side(-1, 100, "-x")
+    side(+1, 200, "+x")
 
     # Water in the pit, up to the ground
     water = [
-        (box(-XP, XP, -YP, YP, Z_PIT, Z_CAV0), 'Water below everything'),
-        (box(-XP, XP, -YP, -YCO, Z_CAV0, GROUND), 'Water, -y side'),
-        (box(-XP, XP, YCO, YP, Z_CAV0, GROUND), 'Water, +y side'),
-        (box(-XP, -XVO1, -YCO, YCO, Z_CAV0, GROUND), 'Water, -x end'),
-        (box(XVO1, XP, -YCO, YCO, Z_CAV0, GROUND), 'Water, +x end'),
-        (box(-XVO1, -XVO0, -YCO, -YDO, Z_CAV0, GROUND), 'Water, -y of vertical duct (-x)'),
-        (box(-XVO1, -XVO0, YDO, YCO, Z_CAV0, GROUND), 'Water, +y of vertical duct (-x)'),
-        (box(XVO0, XVO1, -YCO, -YDO, Z_CAV0, GROUND), 'Water, -y of vertical duct (+x)'),
-        (box(XVO0, XVO1, YDO, YCO, Z_CAV0, GROUND), 'Water, +y of vertical duct (+x)'),
-        (box(-XVO0, -XCO, -YCO, -YDO, Z_CAV0, Z_CAV1), 'Water, -y of horizontal duct (-x)'),
-        (box(-XVO0, -XCO, YDO, YCO, Z_CAV0, Z_CAV1), 'Water, +y of horizontal duct (-x)'),
-        (box(-XVO0, -XCO, -YDO, YDO, Z_CAV0, Z_HD0_OUT), 'Water below horizontal duct (-x)'),
-        (box(XCO, XVO0, -YCO, -YDO, Z_CAV0, Z_CAV1), 'Water, -y of horizontal duct (+x)'),
-        (box(XCO, XVO0, YDO, YCO, Z_CAV0, Z_CAV1), 'Water, +y of horizontal duct (+x)'),
-        (box(XCO, XVO0, -YDO, YDO, Z_CAV0, Z_HD0_OUT), 'Water below horizontal duct (+x)'),
-        (box(-XVO0, XVO0, -YCO, YCO, Z_CAV1, Z_WALLS) & +S['cz', R_WALL_2],
-         'Water around target chamber'),
-        (box(-XVO0, XVO0, -YCO, YCO, Z_WALLS, Z_UP2) & +S['cz', R_UP_OUT],
-         'Water around upstream tube'),
-        (box(-XVO0, XVO0, -YCO, YCO, Z_UP2, GROUND) & +S['cz', R_BEAM_OUT],
-         'Water around beam tube'),
+        (box(-XP, XP, -YP, YP, Z_PIT, Z_CAV0), "Water below everything"),
+        (box(-XP, XP, -YP, -YCO, Z_CAV0, GROUND), "Water, -y side"),
+        (box(-XP, XP, YCO, YP, Z_CAV0, GROUND), "Water, +y side"),
+        (box(-XP, -XVO1, -YCO, YCO, Z_CAV0, GROUND), "Water, -x end"),
+        (box(XVO1, XP, -YCO, YCO, Z_CAV0, GROUND), "Water, +x end"),
+        (box(-XVO1, -XVO0, -YCO, -YDO, Z_CAV0, GROUND), "Water, -y of vertical duct (-x)"),
+        (box(-XVO1, -XVO0, YDO, YCO, Z_CAV0, GROUND), "Water, +y of vertical duct (-x)"),
+        (box(XVO0, XVO1, -YCO, -YDO, Z_CAV0, GROUND), "Water, -y of vertical duct (+x)"),
+        (box(XVO0, XVO1, YDO, YCO, Z_CAV0, GROUND), "Water, +y of vertical duct (+x)"),
+        (box(-XVO0, -XCO, -YCO, -YDO, Z_CAV0, Z_CAV1), "Water, -y of horizontal duct (-x)"),
+        (box(-XVO0, -XCO, YDO, YCO, Z_CAV0, Z_CAV1), "Water, +y of horizontal duct (-x)"),
+        (box(-XVO0, -XCO, -YDO, YDO, Z_CAV0, Z_HD0_OUT), "Water below horizontal duct (-x)"),
+        (box(XCO, XVO0, -YCO, -YDO, Z_CAV0, Z_CAV1), "Water, -y of horizontal duct (+x)"),
+        (box(XCO, XVO0, YDO, YCO, Z_CAV0, Z_CAV1), "Water, +y of horizontal duct (+x)"),
+        (box(XCO, XVO0, -YDO, YDO, Z_CAV0, Z_HD0_OUT), "Water below horizontal duct (+x)"),
+        (
+            box(-XVO0, XVO0, -YCO, YCO, Z_CAV1, Z_WALLS) & +S["cz", R_WALL_2],
+            "Water around target chamber",
+        ),
+        (
+            box(-XVO0, XVO0, -YCO, YCO, Z_WALLS, Z_UP2) & +S["cz", R_UP_OUT],
+            "Water around upstream tube",
+        ),
+        (
+            box(-XVO0, XVO0, -YCO, YCO, Z_UP2, GROUND) & +S["cz", R_BEAM_OUT],
+            "Water around beam tube",
+        ),
     ]
     for n, (region, name) in enumerate(water, start=301):
         cell(n, H2O, region, name)
 
     # Pit liner and air gap
-    cell(401, SS, box(-XL, XL, -YL, YL, Z_LINER, Z_PIT), 'Pit liner, bottom')
-    cell(402, SS, box(-XL, XL, -YL, -YP, Z_PIT, GROUND), 'Pit liner, -y side')
-    cell(403, SS, box(-XL, XL, YP, YL, Z_PIT, GROUND), 'Pit liner, +y side')
-    cell(404, SS, box(-XL, -XP, -YP, YP, Z_PIT, GROUND), 'Pit liner, -x side')
-    cell(405, SS, box(XP, XL, -YP, YP, Z_PIT, GROUND), 'Pit liner, +x side')
-    cell(411, AIR, box(-XA, XA, -YA, YA, Z_GAP, Z_LINER), 'Air gap, bottom')
-    cell(412, AIR, box(-XA, XA, -YA, -YL, Z_LINER, GROUND), 'Air gap, -y side')
-    cell(413, AIR, box(-XA, XA, YL, YA, Z_LINER, GROUND), 'Air gap, +y side')
-    cell(414, AIR, box(-XA, -XL, -YL, YL, Z_LINER, GROUND), 'Air gap, -x side')
-    cell(415, AIR, box(XL, XA, -YL, YL, Z_LINER, GROUND), 'Air gap, +x side')
+    cell(401, SS, box(-XL, XL, -YL, YL, Z_LINER, Z_PIT), "Pit liner, bottom")
+    cell(402, SS, box(-XL, XL, -YL, -YP, Z_PIT, GROUND), "Pit liner, -y side")
+    cell(403, SS, box(-XL, XL, YP, YL, Z_PIT, GROUND), "Pit liner, +y side")
+    cell(404, SS, box(-XL, -XP, -YP, YP, Z_PIT, GROUND), "Pit liner, -x side")
+    cell(405, SS, box(XP, XL, -YP, YP, Z_PIT, GROUND), "Pit liner, +x side")
+    cell(411, AIR, box(-XA, XA, -YA, YA, Z_GAP, Z_LINER), "Air gap, bottom")
+    cell(412, AIR, box(-XA, XA, -YA, -YL, Z_LINER, GROUND), "Air gap, -y side")
+    cell(413, AIR, box(-XA, XA, YL, YA, Z_LINER, GROUND), "Air gap, +y side")
+    cell(414, AIR, box(-XA, -XL, -YL, YL, Z_LINER, GROUND), "Air gap, -x side")
+    cell(415, AIR, box(XL, XA, -YL, YL, Z_LINER, GROUND), "Air gap, +x side")
 
     # Concrete
-    cell(501, CONC, box(-XW, XW, -YW, YW, Z_SLAB, Z_GAP), 'Slab below pit')
-    cell(502, CONC, box(-XW, XW, -YW, -YA, Z_GAP, Z_FLOOR), 'Pit wall, -y side')
-    cell(503, CONC, box(-XW, XW, YA, YW, Z_GAP, Z_FLOOR), 'Pit wall, +y side')
-    cell(504, CONC, box(-XW, -XA, -YA, YA, Z_GAP, Z_FLOOR), 'Pit wall, -x side')
-    cell(505, CONC, box(XA, XW, -YA, YA, Z_GAP, Z_FLOOR), 'Pit wall, +x side')
-    cell(506, CONC, box(-XE, XE, -YE, -YA, Z_FLOOR, GROUND), 'Floor, -y side')
-    cell(507, CONC, box(-XE, XE, YA, YE, Z_FLOOR, GROUND), 'Floor, +y side')
-    cell(508, CONC, box(-XE, -XA, -YA, YA, Z_FLOOR, GROUND), 'Floor, -x side')
-    cell(509, CONC, box(XA, XE, -YA, YA, Z_FLOOR, GROUND), 'Floor, +x side')
+    cell(501, CONC, box(-XW, XW, -YW, YW, Z_SLAB, Z_GAP), "Slab below pit")
+    cell(502, CONC, box(-XW, XW, -YW, -YA, Z_GAP, Z_FLOOR), "Pit wall, -y side")
+    cell(503, CONC, box(-XW, XW, YA, YW, Z_GAP, Z_FLOOR), "Pit wall, +y side")
+    cell(504, CONC, box(-XW, -XA, -YA, YA, Z_GAP, Z_FLOOR), "Pit wall, -x side")
+    cell(505, CONC, box(XA, XW, -YA, YA, Z_GAP, Z_FLOOR), "Pit wall, +x side")
+    cell(506, CONC, box(-XE, XE, -YE, -YA, Z_FLOOR, GROUND), "Floor, -y side")
+    cell(507, CONC, box(-XE, XE, YA, YE, Z_FLOOR, GROUND), "Floor, +y side")
+    cell(508, CONC, box(-XE, -XA, -YA, YA, Z_FLOOR, GROUND), "Floor, -x side")
+    cell(509, CONC, box(XA, XE, -YA, YA, Z_FLOOR, GROUND), "Floor, +x side")
 
     # Earth
-    cell(601, EARTH, box(-XE, XE, -YE, YE, Z_EARTH, Z_SLAB), 'Earth below slab')
-    cell(602, EARTH, box(-XE, XE, -YE, -YW, Z_SLAB, Z_FLOOR), 'Earth beside pit walls, -y side')
-    cell(603, EARTH, box(-XE, XE, YW, YE, Z_SLAB, Z_FLOOR), 'Earth beside pit walls, +y side')
-    cell(604, EARTH, box(-XE, -XW, -YW, YW, Z_SLAB, Z_FLOOR), 'Earth beside pit walls, -x side')
-    cell(605, EARTH, box(XW, XE, -YW, YW, Z_SLAB, Z_FLOOR), 'Earth beside pit walls, +x side')
+    cell(601, EARTH, box(-XE, XE, -YE, YE, Z_EARTH, Z_SLAB), "Earth below slab")
+    cell(602, EARTH, box(-XE, XE, -YE, -YW, Z_SLAB, Z_FLOOR), "Earth beside pit walls, -y side")
+    cell(603, EARTH, box(-XE, XE, YW, YE, Z_SLAB, Z_FLOOR), "Earth beside pit walls, +y side")
+    cell(604, EARTH, box(-XE, -XW, -YW, YW, Z_SLAB, Z_FLOOR), "Earth beside pit walls, -x side")
+    cell(605, EARTH, box(XW, XE, -YW, YW, Z_SLAB, Z_FLOOR), "Earth beside pit walls, +x side")
 
     # Air above ground
-    cell(701, AIR, box(-XE, XE, -YE, YE, GROUND, Z_ROOF), 'Air above ground')
+    cell(701, AIR, box(-XE, XE, -YE, YE, GROUND, Z_ROOF), "Air above ground")
 
     # The volume of each cell MCNP needs a vol= for, as in the MCNP model
     by_id = {surface.id: surface for surface in S.values()}
@@ -425,35 +485,35 @@ def disk_rect_area(r, x0, x1, y0, y1):
 def prism_volume(region, surfaces):
     """Volume of a cell bounded by planes normal to x or y and cylinders along z (and planes
     normal to z), or None for any other cell."""
-    lo = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
-    hi = {'x': math.inf, 'y': math.inf, 'z': math.inf}
+    lo = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
+    hi = {"x": math.inf, "y": math.inf, "z": math.inf}
     inside, outside = [], []
-    for token in re.findall(r'-?\d+', str(region)):
-        surface, negative = surfaces[abs(int(token))], token.startswith('-')
+    for token in re.findall(r"-?\d+", str(region)):
+        surface, negative = surfaces[abs(int(token))], token.startswith("-")
         if isinstance(surface, openmc.ZCylinder):
             (inside if negative else outside).append(surface.r)
         else:
-            axis = {openmc.XPlane: 'x', openmc.YPlane: 'y', openmc.ZPlane: 'z'}[type(surface)]
-            value = {'x': 'x0', 'y': 'y0', 'z': 'z0'}[axis]
+            axis = {openmc.XPlane: "x", openmc.YPlane: "y", openmc.ZPlane: "z"}[type(surface)]
+            value = {"x": "x0", "y": "y0", "z": "z0"}[axis]
             if negative:
                 hi[axis] = min(hi[axis], getattr(surface, value))
             else:
                 lo[axis] = max(lo[axis], getattr(surface, value))
-    if not (inside or outside) or all(math.isinf(lo[a]) and math.isinf(hi[a]) for a in 'xy'):
+    if not (inside or outside) or all(math.isinf(lo[a]) and math.isinf(hi[a]) for a in "xy"):
         return None
     big = 1e6
-    x0, x1 = max(lo['x'], -big), min(hi['x'], big)
-    y0, y1 = max(lo['y'], -big), min(hi['y'], big)
+    x0, x1 = max(lo["x"], -big), min(hi["x"], big)
+    y0, y1 = max(lo["y"], -big), min(hi["y"], big)
     area = disk_rect_area(inside[0], x0, x1, y0, y1) if inside else (x1 - x0) * (y1 - y0)
     if outside:
         area -= disk_rect_area(outside[0], x0, x1, y0, y1)
-    return area * (hi['z'] - lo['z'])
+    return area * (hi["z"] - lo["z"])
 
 
 # ------------------------------------------------------------------------------
 # Geometry plots and mesh tallies, following the MCNP plot command files ../mcnp/plot_<plane>_<view>
 # ------------------------------------------------------------------------------
-PLOTS = [(plane, view) for view in ['pit', 'cavity'] for plane in ['xy', 'xz']]
+PLOTS = [(plane, view) for view in ["pit", "cavity"] for plane in ["xy", "xz"]]
 
 
 @functools.cache
@@ -462,13 +522,13 @@ def read_plot(plane, view):
     origin and extent)."""
     origin = extent = None
     shades = {}
-    for line in open(os.path.join(MCNP_DIR, f'plot_{plane}_{view}')):
-        f = line.split('$')[0].split()
-        if f and f[0] == 'origin':
+    for line in open(os.path.join(MCNP_DIR, f"plot_{plane}_{view}")):
+        f = line.split("$")[0].split()
+        if f and f[0] == "origin":
             origin = [float(v) for v in f[1:4]]
-        elif f and f[0] == 'extent':
+        elif f and f[0] == "extent":
             extent = float(f[1])
-        elif f and f[0] == 'shade':
+        elif f and f[0] == "shade":
             shades[int(f[1])] = f[2].lower()
     return origin, extent, shades
 
@@ -487,9 +547,9 @@ def get_plots(mats):
         plot.origin = origin
         plot.width = (2 * extent, 2 * extent)
         plot.pixels = (1000, 1000)
-        plot.color_by = 'material'
+        plot.color_by = "material"
         plot.colors = {mats[m]: rgb(color) for m, color in shades.items() if m in mats}
-        plot.filename = os.path.join(IMAGES_DIR, f'artemis_openmc_geom_{plane}_{view}')
+        plot.filename = os.path.join(IMAGES_DIR, f"artemis_openmc_geom_{plane}_{view}")
         plots.append(plot)
     return openmc.Plots(plots)
 
@@ -497,7 +557,7 @@ def get_plots(mats):
 # Mesh tallies: over the window of each plot, 4 inches deep across the plot plane; 1-inch bins for
 # the pit plots and half-inch bins for the cavity plots
 MESH_DEPTH = 4 * 2.54
-MESH_BINS = {'pit': 2.54, 'cavity': 1.27}
+MESH_BINS = {"pit": 2.54, "cavity": 1.27}
 # Energy groups of the neutron mesh tallies [eV]: below 0.5 eV, 0.5 eV to 0.1 MeV, 0.1 to 10 MeV,
 # and above 10 MeV (up to the top of the cassette spectrum's bins), as emesh in the MCNP deck
 NEUTRON_GROUPS = [0.0, 0.5, 1e5, 1e7, 1e9]
@@ -509,41 +569,48 @@ def get_tallies(geom):
     cassettes = openmc.CellFilter([cells[106], cells[206]])
     # One filter per particle, shared by the tallies (OpenMC merges equal filters when it writes
     # them, and warns about it)
-    only = {p: openmc.ParticleFilter(p) for p in ['neutron', 'photon']}
+    only = {p: openmc.ParticleFilter(p) for p in ["neutron", "photon"]}
     groups = openmc.EnergyFilter(NEUTRON_GROUPS)
     tallies = []
 
-    t = openmc.Tally(14, name='Neutron energy spectrum in the cassette regions (CCFE-709)')
-    t.filters = [cassettes, only['neutron'],
-                 openmc.EnergyFilter.from_group_structure('CCFE-709')]
-    t.scores = ['flux']
+    t = openmc.Tally(14, name="Neutron energy spectrum in the cassette regions (CCFE-709)")
+    t.filters = [cassettes, only["neutron"], openmc.EnergyFilter.from_group_structure("CCFE-709")]
+    t.scores = ["flux"]
     tallies.append(t)
 
-    t = openmc.Tally(24, name='Photon energy spectrum in the cassette regions (VITAMIN-J-42)')
-    t.filters = [cassettes, only['photon'],
-                 openmc.EnergyFilter.from_group_structure('VITAMIN-J-42')]
-    t.scores = ['flux']
+    t = openmc.Tally(24, name="Photon energy spectrum in the cassette regions (VITAMIN-J-42)")
+    t.filters = [
+        cassettes,
+        only["photon"],
+        openmc.EnergyFilter.from_group_structure("VITAMIN-J-42"),
+    ]
+    t.scores = ["flux"]
     tallies.append(t)
 
     number = 34
-    for particle in ['neutron', 'photon']:
+    for particle in ["neutron", "photon"]:
         for plane, view in PLOTS:
             origin, extent, _ = read_plot(plane, view)
             mesh = openmc.RegularMesh(mesh_id=number)
             lower, upper, dims = [], [], []
-            for axis, c0 in zip('xyz', origin):
-                half, n = ((extent, round(2 * extent / MESH_BINS[view])) if axis in plane
-                           else (MESH_DEPTH / 2, 1))
+            for axis, c0 in zip("xyz", origin):
+                half, n = (
+                    (extent, round(2 * extent / MESH_BINS[view]))
+                    if axis in plane
+                    else (MESH_DEPTH / 2, 1)
+                )
                 lower.append(c0 - half)
                 upper.append(c0 + half)
                 dims.append(n)
             mesh.lower_left, mesh.upper_right, mesh.dimension = lower, upper, dims
-            t = openmc.Tally(number, name=f'{particle.capitalize()} flux in the {plane} plane '
-                                          f'(as plot_{plane}_{view})')
+            t = openmc.Tally(
+                number,
+                name=f"{particle.capitalize()} flux in the {plane} plane (as plot_{plane}_{view})",
+            )
             t.filters = [openmc.MeshFilter(mesh), only[particle]]
-            if particle == 'neutron':
+            if particle == "neutron":
                 t.filters.append(groups)
-            t.scores = ['flux']
+            t.scores = ["flux"]
             tallies.append(t)
             number += 10
 
@@ -551,7 +618,7 @@ def get_tallies(geom):
 
 
 def get_settings(sources):
-
+    # fmt: off
     settings                  = openmc.Settings()
     settings.run_mode         = 'fixed source'
     settings.source           = sources
@@ -566,46 +633,51 @@ def get_settings(sources):
 
     # The tallies are in the statepoints: no tallies.out
     settings.output           = {'tallies': False}
+    # fmt: on
 
     return settings
 
 
 def statepoints():
     """Statepoint files in this folder, by batch."""
-    files = glob.glob(os.path.join(HERE, 'statepoint.*.h5'))
-    return sorted(files, key=lambda f: int(f.split('.')[-2]))
+    files = glob.glob(os.path.join(HERE, "statepoint.*.h5"))
+    return sorted(files, key=lambda f: int(f.split(".")[-2]))
 
 
 def main():
 
-    parser = argparse.ArgumentParser(description='Simplified OpenMC model of Artemis')
-    parser.add_argument('--plot', action='store_true', help='make the geometry plots only')
-    parser.add_argument('--inputs', action='store_true', help='write model.xml only')
-    parser.add_argument('--restart', action='store_true',
-                        help='continue from the latest statepoint')
-    parser.add_argument('--threads', type=int, default=None,
-                        help='number of threads (default: all)')
+    parser = argparse.ArgumentParser(description="Simplified OpenMC model of Artemis")
+    parser.add_argument("--plot", action="store_true", help="make the geometry plots only")
+    parser.add_argument("--inputs", action="store_true", help="write model.xml only")
+    parser.add_argument(
+        "--restart", action="store_true", help="continue from the latest statepoint"
+    )
+    parser.add_argument(
+        "--threads", type=int, default=None, help="number of threads (default: all)"
+    )
     args = parser.parse_args()
 
     check_source(SOURCE_H5)
 
+    # fmt: off
     mats     = get_materials()
     geometry = get_geometry(mats)
     model    = openmc.Model(geometry=geometry, materials=openmc.Materials(mats.values()),
                             settings=get_settings(get_openmc_sources(SOURCE_H5)),
                             tallies=get_tallies(geometry), plots=get_plots(mats))
+    # fmt: on
 
     if args.plot:
         model.plot_geometry(cwd=HERE)
         return
     if args.inputs:
-        model.export_to_model_xml(os.path.join(HERE, 'model.xml'))
+        model.export_to_model_xml(os.path.join(HERE, "model.xml"))
         return
 
     restart = None
     if args.restart:
         if not statepoints():
-            raise SystemExit('No statepoint to restart from')
+            raise SystemExit("No statepoint to restart from")
         restart = statepoints()[-1]
     model.run(cwd=HERE, threads=args.threads, restart_file=restart)  # writes model.xml first
 
@@ -614,4 +686,5 @@ def main():
         os.remove(f)
 
 
-if __name__ == '__main__': main()
+if __name__ == "__main__":
+    main()

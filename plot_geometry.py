@@ -28,29 +28,29 @@ import sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-MCNP_DIR = os.path.join(HERE, 'mcnp')
-IMAGES_DIR = os.path.join(HERE, 'images')
+MCNP_DIR = os.path.join(HERE, "mcnp")
+IMAGES_DIR = os.path.join(HERE, "images")
 
 
 def plot_files():
     """Names of the plot command files in mcnp/ (plot_xy_pit, ...), without the plot_ prefix."""
-    files = [f for f in glob.glob(os.path.join(MCNP_DIR, 'plot_*')) if os.path.isfile(f)]
-    return sorted(os.path.basename(f)[len('plot_'):] for f in files)
+    files = [f for f in glob.glob(os.path.join(MCNP_DIR, "plot_*")) if os.path.isfile(f)]
+    return sorted(os.path.basename(f)[len("plot_") :] for f in files)
 
 
 def mcnp_commands(name):
     """The plot file's commands, without comments, on as few lines as fit in 80 columns, followed by
     scale 1 (a frame around the plot, to crop to) and end (to leave the plotter)."""
     tokens = []
-    for line in open(os.path.join(MCNP_DIR, f'plot_{name}')):
-        tokens += [line.split('$')[0].split()]
-    lines = ['']
-    for t in [x for x in tokens if x] + [['scale', '1']]:
-        text = ' '.join(t)
+    for line in open(os.path.join(MCNP_DIR, f"plot_{name}")):
+        tokens += [line.split("$")[0].split()]
+    lines = [""]
+    for t in [x for x in tokens if x] + [["scale", "1"]]:
+        text = " ".join(t)
         if lines[-1] and len(lines[-1]) + 1 + len(text) > 80:
-            lines.append('')
-        lines[-1] = (lines[-1] + ' ' + text).strip()
-    return '\n'.join(lines) + '\nend\n'
+            lines.append("")
+        lines[-1] = (lines[-1] + " " + text).strip()
+    return "\n".join(lines) + "\nend\n"
 
 
 def crop_to_frame(image):
@@ -73,56 +73,61 @@ def crop_to_frame(image):
 def plot_mcnp(dpi):
     from PIL import Image
 
-    mcnp = shutil.which('mcnp6')
-    gs = shutil.which('gswin64c' if platform.system() == 'Windows' else 'gs')
+    mcnp = shutil.which("mcnp6")
+    gs = shutil.which("gswin64c" if platform.system() == "Windows" else "gs")
     if mcnp is None or gs is None:
-        raise SystemExit('MCNP plots need mcnp6 and Ghostscript on the PATH')
+        raise SystemExit("MCNP plots need mcnp6 and Ghostscript on the PATH")
 
     # Run in mcnp/ (the deck reads its source from ../source/), with every file in a temporary
     # folder
-    tmp = os.path.join(MCNP_DIR, 'geometry_temp')
+    tmp = os.path.join(MCNP_DIR, "geometry_temp")
     shutil.rmtree(tmp, ignore_errors=True)
     os.makedirs(tmp)
     try:
         for name in plot_files():
-            com = os.path.join('geometry_temp', f'{name}.com')
-            with open(os.path.join(MCNP_DIR, com), 'w', newline='\n') as w:
+            com = os.path.join("geometry_temp", f"{name}.com")
+            with open(os.path.join(MCNP_DIR, com), "w", newline="\n") as w:
                 w.write(mcnp_commands(name))
-            ps = os.path.join('geometry_temp', name)  # MCNP adds .ps
-            subprocess.run([mcnp, 'ip', 'i=artemis.i', f'n={ps}.', 'notek', f'com={com}',
-                            f'plotm={ps}'], cwd=MCNP_DIR, check=True, stdout=subprocess.DEVNULL)
+            ps = os.path.join("geometry_temp", name)  # MCNP adds .ps
+            subprocess.run(
+                [mcnp, "ip", "i=artemis.i", f"n={ps}.", "notek", f"com={com}", f"plotm={ps}"],
+                cwd=MCNP_DIR,
+                check=True,
+                stdout=subprocess.DEVNULL,
+            )
 
             # Each command line draws the plot again: keep only the last page of the PostScript
-            lines = open(os.path.join(MCNP_DIR, ps + '.ps')).readlines()
-            ends = [i for i, x in enumerate(lines) if 'stroke showpage' in x]
+            lines = open(os.path.join(MCNP_DIR, ps + ".ps")).readlines()
+            ends = [i for i, x in enumerate(lines) if "stroke showpage" in x]
             start = ends[-2] + 1 if len(ends) > 1 else 0
-            last = os.path.join(MCNP_DIR, ps + '_last.ps')
-            with open(last, 'w') as w:
-                w.writelines(lines[start:ends[-1] + 1])
+            last = os.path.join(MCNP_DIR, ps + "_last.ps")
+            with open(last, "w") as w:
+                w.writelines(lines[start : ends[-1] + 1])
 
-            png = os.path.join(tmp, f'{name}.png')
-            subprocess.run([gs, '-q', '-sDEVICE=png16m', f'-r{dpi}', '-o', png, last], check=True)
-            image = crop_to_frame(Image.open(png).convert('RGB').rotate(-90, expand=True))
-            out = os.path.join(IMAGES_DIR, f'artemis_mcnp_geom_{name}.png')
+            png = os.path.join(tmp, f"{name}.png")
+            subprocess.run([gs, "-q", "-sDEVICE=png16m", f"-r{dpi}", "-o", png, last], check=True)
+            image = crop_to_frame(Image.open(png).convert("RGB").rotate(-90, expand=True))
+            out = os.path.join(IMAGES_DIR, f"artemis_mcnp_geom_{name}.png")
             image.save(out, optimize=True)
-            print('Wrote', os.path.relpath(out, HERE))
+            print("Wrote", os.path.relpath(out, HERE))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
 
 def plot_openmc():
-    script = os.path.join(HERE, 'openmc', 'artemis.py')
-    subprocess.run([sys.executable, script, '--plot'], check=True, stdout=subprocess.DEVNULL)
+    script = os.path.join(HERE, "openmc", "artemis.py")
+    subprocess.run([sys.executable, script, "--plot"], check=True, stdout=subprocess.DEVNULL)
     for name in plot_files():
-        print('Wrote', os.path.join('images', f'artemis_openmc_geom_{name}.png'))
+        print("Wrote", os.path.join("images", f"artemis_openmc_geom_{name}.png"))
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    parser.add_argument('--mcnp', action='store_true', help='MCNP plots only')
-    parser.add_argument('--openmc', action='store_true', help='OpenMC plots only')
-    parser.add_argument('--dpi', type=int, default=135,
-                        help='resolution of the MCNP plots (default 135)')
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("--mcnp", action="store_true", help="MCNP plots only")
+    parser.add_argument("--openmc", action="store_true", help="OpenMC plots only")
+    parser.add_argument(
+        "--dpi", type=int, default=135, help="resolution of the MCNP plots (default 135)"
+    )
     args = parser.parse_args()
     both = not (args.mcnp or args.openmc)
     if args.mcnp or both:
@@ -131,5 +136,5 @@ def main():
         plot_openmc()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
