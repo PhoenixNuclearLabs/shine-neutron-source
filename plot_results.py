@@ -169,7 +169,8 @@ LABELS = {
 CASSETTE_X = (1.27, 51.181)
 CASSETTE_Y = 20.32  # half-width
 CASSETTE_Z = (16.51, 94.615)
-CASSETTE_R = 7.06501  # cavity wall around the target chamber
+CASSETTE_R = 7.06501  # cavity wall around the target chamber: its radius, about x = CASSETTE_XC
+CASSETTE_XC = 0.47752
 CASSETTE_STYLE = {"color": "dimgray", "linestyle": (0, (4, 2)), "linewidth": 1.2}
 
 # Contour levels on log scales, in each decade: 1 and 3 for the whole-geometry (pit) views, and 1, 2,
@@ -453,7 +454,7 @@ def cassette_sides(plane, at):
         segments = [([x0, x1], [y, y]), ([x0, x1], [-y, -y]), ([x1, x1], [-y, y])]
     elif plane == "xz" and abs(at) < y:
         # The bottom, top, and outer end; the inner end is the cavity wall around the chamber
-        inner = np.sqrt(CASSETTE_R**2 - at**2) if abs(at) < CASSETTE_R else x0
+        inner = CASSETTE_XC + np.sqrt(CASSETTE_R**2 - at**2) if abs(at) < CASSETTE_R else x0
         segments = [([inner, x1], [z0, z0]), ([inner, x1], [z1, z1]), ([x1, x1], [z0, z1])]
     return [([sign * x for x in xs], ys) for xs, ys in segments for sign in [1, -1]]
 

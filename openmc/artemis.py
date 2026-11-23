@@ -80,6 +80,7 @@ R_BEAM_IN, R_BEAM_OUT = 3.9624, 4.5974   # beam tube
 R_BORE = 5.4483                          # target chamber inner radius
 R_WALL_1, R_WATER, R_WALL_2 = 5.7277, 5.8674, 6.096
 R_GAP, R_CAV_WALL = 6.40969, 7.06501     # water around the chamber, cavity wall around it
+X_OFF = 0.47752                          # ... with their axes at x = +-X_OFF, toward each cavity
 R_UP_IN, R_UP_OUT = 12.065, 12.7         # upstream tube
 
 # Target chamber and upstream section: heights
@@ -224,18 +225,9 @@ def get_surfaces():
         (
             "cz",
             101,
-            [
-                R_BEAM_IN,
-                R_BEAM_OUT,
-                R_BORE,
-                R_WALL_1,
-                R_WATER,
-                R_WALL_2,
-                R_GAP,
-                R_CAV_WALL,
-                R_UP_IN,
-                R_UP_OUT,
-            ],
+            [(r, 0.0) for r in [R_BEAM_IN, R_BEAM_OUT, R_BORE, R_WALL_1, R_WATER, R_WALL_2]]
+            + [(r, x0) for r in [R_GAP, R_CAV_WALL] for x0 in [-X_OFF, X_OFF]]
+            + [(r, 0.0) for r in [R_UP_IN, R_UP_OUT]],
         ),
         ("px", 201, [XC0] + x_planes + [-v for v in x_planes]),
         ("py", 301, y_planes + [-v for v in y_planes]),
@@ -272,7 +264,7 @@ def get_surfaces():
         ),
     ]
     make = {
-        "cz": lambda n, v: openmc.ZCylinder(surface_id=n, r=v),
+        "cz": lambda n, v: openmc.ZCylinder(surface_id=n, x0=v[1], r=v[0]),
         "px": lambda n, v: openmc.XPlane(surface_id=n, x0=v),
         "py": lambda n, v: openmc.YPlane(surface_id=n, y0=v),
         "pz": lambda n, v: openmc.ZPlane(surface_id=n, z0=v),
@@ -307,8 +299,6 @@ CHAMBER_CELLS = [
     (12, SS,   R_BEAM_OUT, R_UP_OUT,   Z_UP1,     Z_UP2,     'Upstream tube top plate'),
     (13, VOID, None,       R_BEAM_IN,  Z_UP1,     GROUND,    'Vacuum in beam tube'),
     (14, SS,   R_BEAM_IN,  R_BEAM_OUT, Z_UP1,     GROUND,    'Beam tube'),
-    (15, H2O,  R_WALL_2,   R_GAP,      Z_END,     Z_CAV1,    'Water between chamber and cavities'),
-    (16, H2O,  None,       R_GAP,      Z_CAV0,    Z_END,     'Water below chamber, in cavities'),
 ]
 # fmt: on
 
@@ -328,8 +318,8 @@ def get_geometry(mats):
 
     def tube(r0, r1, z0, z1):
         """Between two cylinders (r0 = None: inside r1), from z0 to z1."""
-        region = -S["cz", r1] & +S["pz", z0] & -S["pz", z1]
-        return region if r0 is None else +S["cz", r0] & region
+        region = -S["cz", (r1, 0.0)] & +S["pz", z0] & -S["pz", z1]
+        return region if r0 is None else +S["cz", (r0, 0.0)] & region
 
     def cell(number, mat, region, name):
         fill = None if mat is None else mats[mat]
@@ -338,6 +328,19 @@ def get_geometry(mats):
     # Target chamber and upstream section
     for number, mat, r0, r1, z0, z1, name in CHAMBER_CELLS:
         cell(number, mat, tube(r0, r1, z0, z1), name)
+    # The water around and below the chamber, in each cavity's half (x < 0 and x > 0), inside the
+    # water cylinder of that cavity
+    for sign, tag in [(-1, "-x"), (+1, "+x")]:
+        half = -S["px", XC0] if sign < 0 else +S["px", XC0]
+        gap = -S["cz", (R_GAP, sign * X_OFF)]
+        cell(15 + (sign > 0), H2O,
+             +S["cz", (R_WALL_2, 0.0)] & gap & half & +S["pz", Z_END] & -S["pz", Z_CAV1],
+             f"Water between chamber and cavity ({tag})")  # fmt: skip
+    for sign, tag in [(-1, "-x"), (+1, "+x")]:
+        half = -S["px", XC0] if sign < 0 else +S["px", XC0]
+        gap = -S["cz", (R_GAP, sign * X_OFF)]
+        cell(17 + (sign > 0), H2O, gap & half & +S["pz", Z_CAV0] & -S["pz", Z_END],
+             f"Water below chamber, in cavity ({tag})")  # fmt: skip
 
     # Irradiation cavities, cassette regions, and ducts, with their walls split into slabs: boxes
     # given for the +x side and mirrored for the -x side
@@ -350,7 +353,9 @@ def get_geometry(mats):
         def cl(i, mat, region, name):
             cell(base + i, mat, region, f"{name} ({tag})")
 
-        out_gap, out_wall = +S["cz", R_GAP], +S["cz", R_CAV_WALL]
+        # This cavity's water and wall cylinders, with their axes toward it
+        gap, wall = S["cz", (R_GAP, sign * X_OFF)], S["cz", (R_CAV_WALL, sign * X_OFF)]
+        out_gap, out_wall = +gap, +wall
         inner_x = +S["px", XC1] if sign > 0 else -S["px", -XC1]
         # fmt: off
         cl( 1, AIR, b(XCS, XCI, -YCI, YCI, Z_AIR0, Z_AIR1), 'Air in cavity, beyond cassette')
@@ -366,7 +371,8 @@ def get_geometry(mats):
         cl( 9, AL,  b(XC0, XCO, YCI, YCO, Z_AIR0, Z_AIR1), 'Cavity +y wall')
         cl(10, AL,  b(XC0, XCO, -YCO, -YCI, Z_AIR0, Z_AIR1), 'Cavity -y wall')
         cl(11, AL,  b(XC0, XC1, -YCI, YCI, Z_AIR0, Z_AIR1) & out_gap, 'Cavity inner wall')
-        cl(12, AL,  inner_x & tube(R_GAP, R_CAV_WALL, Z_AIR0, Z_AIR1), 'Cavity wall around chamber')
+        cl(12, AL,  inner_x & out_gap & -wall & +S['pz', Z_AIR0] & -S['pz', Z_AIR1],
+            'Cavity wall around chamber')
         cl(13, AL,  b(XCI, XCO, YDI, YCI, Z_AIR0, Z_AIR1), 'Cavity outer wall, +y of duct')
         cl(14, AL,  b(XCI, XCO, -YCI, -YDI, Z_AIR0, Z_AIR1), 'Cavity outer wall, -y of duct')
         cl(15, AL,  b(XCI, XCO, -YDI, YDI, Z_AIR0, Z_HD0), 'Cavity outer wall, below duct')
@@ -405,15 +411,15 @@ def get_geometry(mats):
         (box(XCO, XVO0, YDO, YCO, Z_CAV0, Z_CAV1), "Water, +y of horizontal duct (+x)"),
         (box(XCO, XVO0, -YDO, YDO, Z_CAV0, Z_HD0_OUT), "Water below horizontal duct (+x)"),
         (
-            box(-XVO0, XVO0, -YCO, YCO, Z_CAV1, Z_WALLS) & +S["cz", R_WALL_2],
+            box(-XVO0, XVO0, -YCO, YCO, Z_CAV1, Z_WALLS) & +S["cz", (R_WALL_2, 0.0)],
             "Water around target chamber",
         ),
         (
-            box(-XVO0, XVO0, -YCO, YCO, Z_WALLS, Z_UP2) & +S["cz", R_UP_OUT],
+            box(-XVO0, XVO0, -YCO, YCO, Z_WALLS, Z_UP2) & +S["cz", (R_UP_OUT, 0.0)],
             "Water around upstream tube",
         ),
         (
-            box(-XVO0, XVO0, -YCO, YCO, Z_UP2, GROUND) & +S["cz", R_BEAM_OUT],
+            box(-XVO0, XVO0, -YCO, YCO, Z_UP2, GROUND) & +S["cz", (R_BEAM_OUT, 0.0)],
             "Water around beam tube",
         ),
     ]
@@ -470,9 +476,9 @@ def get_geometry(mats):
 # times its height. The cross-section is the integral over x of the chord length in y, in closed
 # form piece by piece.
 # ------------------------------------------------------------------------------
-def disk_rect_area(r, x0, x1, y0, y1):
-    """Area of the rectangle [x0, x1] x [y0, y1] inside the disk of radius r about the origin."""
-    x0, x1 = max(x0, -r), min(x1, r)
+def disk_rect_area(r, x0, x1, y0, y1, xc=0.0):
+    """Area of the rectangle [x0, x1] x [y0, y1] inside the disk of radius r about (xc, 0)."""
+    x0, x1 = max(x0 - xc, -r), min(x1 - xc, r)
     if x1 <= x0:
         return 0.0
     cuts = {x0, x1}
@@ -506,7 +512,7 @@ def prism_volume(region, surfaces):
     for token in re.findall(r"-?\d+", str(region)):
         surface, negative = surfaces[abs(int(token))], token.startswith("-")
         if isinstance(surface, openmc.ZCylinder):
-            (inside if negative else outside).append(surface.r)
+            (inside if negative else outside).append((surface.r, surface.x0))
         else:
             axis = {openmc.XPlane: "x", openmc.YPlane: "y", openmc.ZPlane: "z"}[type(surface)]
             value = {"x": "x0", "y": "y0", "z": "z0"}[axis]
@@ -519,9 +525,12 @@ def prism_volume(region, surfaces):
     big = 1e6
     x0, x1 = max(lo["x"], -big), min(hi["x"], big)
     y0, y1 = max(lo["y"], -big), min(hi["y"], big)
-    area = disk_rect_area(inside[0], x0, x1, y0, y1) if inside else (x1 - x0) * (y1 - y0)
+    if inside:
+        area = disk_rect_area(inside[0][0], x0, x1, y0, y1, inside[0][1])
+    else:
+        area = (x1 - x0) * (y1 - y0)
     if outside:
-        area -= disk_rect_area(outside[0], x0, x1, y0, y1)
+        area -= disk_rect_area(outside[0][0], x0, x1, y0, y1, outside[0][1])
     return area * (hi["z"] - lo["z"])
 
 
