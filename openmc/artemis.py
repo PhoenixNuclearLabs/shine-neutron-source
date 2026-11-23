@@ -760,10 +760,13 @@ def main():
     geometry = get_geometry(mats)
     model    = openmc.Model(geometry=geometry, materials=openmc.Materials(mats.values()),
                             settings=get_settings(get_openmc_sources(SOURCE_H5)),
-                            tallies=get_tallies(geometry), plots=get_plots(mats))
+                            tallies=get_tallies(geometry))
     # fmt: on
 
+    # The geometry plots only with --plot: OpenMC checks that their folder (../images/) exists
+    # before any run that holds them
     if args.plot:
+        model.plots = get_plots(mats)
         model.plot_geometry(cwd=HERE)
         return
     if args.inputs:
