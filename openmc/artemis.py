@@ -22,7 +22,8 @@
 #   cell) and the mesh tallies by the volume of a mesh element.
 #
 # The neutron source comes from ../source/Artemis/source.h5, made by beam-target
-# (https://github.com/lucasjacobson/beam-target), which must be installed to run this script. The
+# (https://github.com/lucasjacobson/beam-target), and is read with ../source/Artemis/openmc_source.py,
+# which beam-target writes with it, so beam-target need not be installed to run this script. The
 # geometry plots and mesh tallies follow the MCNP plot command files ../mcnp/plot_*. Set
 # OPENMC_CROSS_SECTIONS to the cross_sections.xml of an ENDF/B-VIII.1 library, the data the MCNP
 # model uses.
@@ -37,6 +38,7 @@
 import argparse
 import functools
 import glob
+import importlib.util
 import math
 import os
 import re
@@ -44,12 +46,25 @@ import re
 import h5py
 import matplotlib.colors
 import numpy as np
-from beamtarget.openmc_source import get_openmc_sources
 
 import openmc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SOURCE_H5 = os.path.join(HERE, "..", "source", "Artemis", "source.h5")
+SOURCE_DIR = os.path.join(HERE, "..", "source", "Artemis")
+SOURCE_H5 = os.path.join(SOURCE_DIR, "source.h5")
+
+
+def get_openmc_sources(path):
+    """The OpenMC sources of a source.h5 file, from the openmc_source.py that beam-target wrote with
+    it (so beam-target need not be installed)."""
+    spec = importlib.util.spec_from_file_location(
+        "openmc_source", os.path.join(SOURCE_DIR, "openmc_source.py")
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.get_openmc_sources(path)
+
+
 MCNP_DIR = os.path.join(HERE, "..", "mcnp")
 IMAGES_DIR = os.path.join(HERE, "..", "images")
 

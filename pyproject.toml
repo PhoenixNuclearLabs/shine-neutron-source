@@ -1,5 +1,7 @@
 [tool.ruff]
 line-length = 100
+# beam-target writes source/<case>/openmc_source.py: leave it as written
+extend-exclude = ["source"]
 
 [tool.ruff.lint]
 # pycodestyle errors/warnings (PEP 8), pyflakes, import sorting
