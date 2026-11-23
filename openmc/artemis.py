@@ -565,6 +565,50 @@ NEUTRON_GROUPS = [0.0, 0.5, 1e5, 1e7, 1e9]
 # around the target chamber (where it crosses the x axis), centered at the height of the peak flux
 # (the height of the plot_xy planes)
 PLATE_WIDTH, PLATE_THICKNESS, Z_PEAK = 5.0, 0.1, 55.88
+# Responses in silicon, from the tables in data/ (from MCNP's own ACE files for silicon, so they are
+# the same data as the MCNP deck's fm cards with m311 use):
+# - 1-MeV(Si) equivalent neutron flux: the flux times the damage energy cross section (MT 444) over
+#   the 1 MeV reference of 95 MeV-mb
+# - neutron and photon kerma in silicon [rad(Si)/s]: the flux times the heating cross section (the
+#   total cross section times the heating number) times RAD
+DATA_DIR = os.path.join(HERE, "..", "data")
+D_REF = 95e3  # [eV-b]
+A_SI = 28.0855  # [g/mol]
+RAD = 6.02214076e23 / A_SI * 1e-24 * 1.602176634e-8 * 1e-6  # [rad-cm^2 per eV-b]
+
+
+@functools.cache
+def silicon_filters():
+    """EnergyFunctionFilters of the responses in silicon: {"si", "nkerma", "pkerma"}."""
+    neutron = np.loadtxt(os.path.join(DATA_DIR, "silicon_neutron.txt"))
+    photon = np.loadtxt(os.path.join(DATA_DIR, "silicon_photon.txt"))
+    # The photon data give each photoelectric edge twice (the values below and above the jump);
+    # OpenMC needs increasing energies, so the second of each pair moves up by a relative 1e-9
+    for table in [neutron, photon]:
+        repeat = np.concatenate([[False], np.diff(table[:, 0]) == 0])
+        table[repeat, 0] *= 1 + 1e-9
+        assert np.all(np.diff(table[:, 0]) > 0)
+    return {
+        "si": openmc.EnergyFunctionFilter(neutron[:, 0], neutron[:, 1] / D_REF),
+        "nkerma": openmc.EnergyFunctionFilter(neutron[:, 0], neutron[:, 2] * RAD),
+        "pkerma": openmc.EnergyFunctionFilter(
+            photon[:, 0], photon[:, 1] * RAD, interpolation="log-log"
+        ),
+    }
+
+
+# The quantities tallied: name, particle, and the response filter (None for the flux)
+QUANTITIES = {
+    "neutron": ("Neutron flux", "neutron"),
+    "photon": ("Photon flux", "photon"),
+    "si": ("1-MeV(Si) equivalent neutron flux", "neutron"),
+    "nkerma": ("Neutron kerma in silicon", "neutron"),
+    "pkerma": ("Photon kerma in silicon", "photon"),
+}
+# Cell tallies (the cassette regions) of the responses in silicon, after the spectra (14 and 24)
+CELL_TALLIES = {"si": 34, "nkerma": 44, "pkerma": 54}
+# Mesh tallies: each quantity in each plot window, from 64 up, then the plates
+MAPS = ["neutron", "photon", "si", "nkerma", "pkerma"]
 
 
 def get_tallies(geom):
@@ -577,20 +621,28 @@ def get_tallies(geom):
     groups = openmc.EnergyFilter(NEUTRON_GROUPS)
     ccfe = openmc.EnergyFilter.from_group_structure("CCFE-709")
     vitamin_j = openmc.EnergyFilter.from_group_structure("VITAMIN-J-42")
+    # The filter of each quantity's energy dependence
+    energy = {"neutron": groups, "photon": None, **silicon_filters()}
     tallies = []
 
-    t = openmc.Tally(14, name="Neutron energy spectrum in the cassette regions (CCFE-709)")
-    t.filters = [cassettes, only["neutron"], ccfe]
-    t.scores = ["flux"]
-    tallies.append(t)
+    def tally(number, name, *filters):
+        t = openmc.Tally(number, name=name)
+        t.filters = [f for f in filters if f is not None]
+        t.scores = ["flux"]
+        tallies.append(t)
 
-    t = openmc.Tally(24, name="Photon energy spectrum in the cassette regions (VITAMIN-J-42)")
-    t.filters = [cassettes, only["photon"], vitamin_j]
-    t.scores = ["flux"]
-    tallies.append(t)
+    tally(14, "Neutron energy spectrum in the cassette regions (CCFE-709)", cassettes,
+          only["neutron"], ccfe)  # fmt: skip
+    tally(24, "Photon energy spectrum in the cassette regions (VITAMIN-J-42)", cassettes,
+          only["photon"], vitamin_j)  # fmt: skip
+    for quantity, number in CELL_TALLIES.items():
+        name, particle = QUANTITIES[quantity]
+        tally(number, f"{name} in the cassette regions", cassettes, only[particle],
+              energy[quantity])  # fmt: skip
 
-    number = 34
-    for particle in ["neutron", "photon"]:
+    number = 64
+    for quantity in MAPS:
+        name, particle = QUANTITIES[quantity]
         for plane, view in PLOTS:
             origin, extent, _ = read_plot(plane, view)
             mesh = openmc.RegularMesh(mesh_id=number)
@@ -605,37 +657,33 @@ def get_tallies(geom):
                 upper.append(c0 + half)
                 dims.append(n)
             mesh.lower_left, mesh.upper_right, mesh.dimension = lower, upper, dims
-            t = openmc.Tally(
-                number,
-                name=f"{particle.capitalize()} flux in the {plane} plane (as plot_{plane}_{view})",
-            )
-            t.filters = [openmc.MeshFilter(mesh), only[particle]]
-            if particle == "neutron":
-                t.filters.append(groups)
-            t.scores = ["flux"]
-            tallies.append(t)
+            tally(number, f"{name} in the {plane} plane (as plot_{plane}_{view})",
+                  openmc.MeshFilter(mesh), only[particle], energy[quantity])  # fmt: skip
             number += 10
 
     # Peak flux in each cassette region, -x then +x: one-bin meshes over a plate against the
-    # cavity wall, for neutrons in the four groups, the neutron spectrum, and the photon spectrum
+    # cavity wall, for neutrons in the four groups, the neutron spectrum, the photon spectrum, the
+    # 1-MeV(Si) equivalent neutron flux, and the neutron and photon kerma in silicon
     plates = {}
-    for number, sign in [(114, -1), (124, +1)]:
+    for n, sign in [(number, -1), (number + 10, +1)]:
         x0, x1 = sorted([sign * R_CAV_WALL, sign * (R_CAV_WALL + PLATE_THICKNESS)])
-        mesh = openmc.RegularMesh(mesh_id=number)
+        mesh = openmc.RegularMesh(mesh_id=n)
         mesh.lower_left = [x0, -PLATE_WIDTH / 2, Z_PEAK - PLATE_WIDTH / 2]
         mesh.upper_right = [x1, PLATE_WIDTH / 2, Z_PEAK + PLATE_WIDTH / 2]
         mesh.dimension = [1, 1, 1]
         plates[sign] = openmc.MeshFilter(mesh)
-    for number, particle, energy, what in [
-        (114, "neutron", groups, "Peak neutron flux"),
-        (134, "neutron", ccfe, "Peak neutron spectrum"),
-        (154, "photon", vitamin_j, "Peak photon spectrum"),
+    for what, particle, energy_filter in [
+        ("Peak neutron flux", "neutron", groups),
+        ("Peak neutron spectrum", "neutron", ccfe),
+        ("Peak photon spectrum", "photon", vitamin_j),
+        ("Peak 1-MeV(Si) equivalent flux", "neutron", energy["si"]),
+        ("Peak neutron kerma in silicon", "neutron", energy["nkerma"]),
+        ("Peak photon kerma in silicon", "photon", energy["pkerma"]),
     ]:
         for n, sign, side in [(number, -1, "-x"), (number + 10, +1, "+x")]:
-            t = openmc.Tally(n, name=f"{what} in the {side} cassette region")
-            t.filters = [plates[sign], only[particle], energy]
-            t.scores = ["flux"]
-            tallies.append(t)
+            tally(n, f"{what} in the {side} cassette region", plates[sign], only[particle],
+                  energy_filter)  # fmt: skip
+        number += 20
 
     return openmc.Tallies(tallies)
 
