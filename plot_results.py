@@ -32,8 +32,11 @@ mcnptools (which comes with MCNP), and reading OpenMC results needs the openmc P
 
 Each flux figure has a panel for each plane of a view (xy and xz), all the same height, with a
 shared color scale (FIGURES), the same for every code given: a vmax of None is the largest value
-in the panels. Anything below vmin is shown in the vmin color instead of being left blank. There
-is a contour line at each colorbar tick, labeled with its value and drawn on the colorbar too.
+in the panels. All the flux maps of a view (neutrons in total and in each group, 1-MeV(Si)
+equivalent, and photons) share one scale, from their lowest vmin to the largest value of them all,
+and so do all its dose (kerma) maps (SCALE_GROUP). Anything below vmin is shown in the vmin color
+instead of being left blank. There is a contour line at each colorbar tick, labeled with its value
+and drawn on the colorbar too.
 Material boundaries are drawn on top from the OpenMC geometry plot of the same window
 (images/artemis_openmc_geom_<plane>_<view>.png, made by plot_geometry.py), which shows only
 material boundaries (the MCNP plots also show the boundaries between cells of one material). The
@@ -133,7 +136,7 @@ GROUP = {name: g for g, (name, _) in enumerate(NEUTRON_GROUPS)}
 # fmt: off
 FIGURES = [
     ('neutron'      , None        , 'pit'   , ('log', 1e6, None) , 100),
-    ('neutron'      , None        , 'cavity', ('log', 1e8, None) , 20),
+    ('neutron'      , None        , 'cavity', ('log', 1e7, None) , 20),
     ('neutron'      , 'thermal'   , 'pit'   , ('log', 1e6, None) , 100),
     ('neutron'      , 'thermal'   , 'cavity', ('log', 1e7, None) , 20),
     ('neutron'      , 'epithermal', 'pit'   , ('log', 1e6, None) , 100),
@@ -143,9 +146,9 @@ FIGURES = [
     ('neutron'      , 'high'      , 'pit'   , ('log', 1e6, None) , 100),
     ('neutron'      , 'high'      , 'cavity', ('log', 1e7, None) , 20),
     ('si'           , None        , 'pit'   , ('log', 1e6, None) , 100),
-    ('si'           , None        , 'cavity', ('log', 1e8, None) , 20),
+    ('si'           , None        , 'cavity', ('log', 1e7, None) , 20),
     ('photon'       , None        , 'pit'   , ('log', 1e6, None) , 100),
-    ('photon'       , None        , 'cavity', ('log', 1e8, None) , 20),
+    ('photon'       , None        , 'cavity', ('log', 1e7, None) , 20),
     ('nkerma'       , None        , 'pit'   , ('log', 1e-4, None), 100),
     ('nkerma'       , None        , 'cavity', ('log', 1e-1, None), 20),
     ('pkerma'       , None        , 'pit'   , ('log', 1e-4, None), 100),
@@ -158,6 +161,16 @@ FIGURES = [
     ('high_fraction', None        , 'cavity', ('linear', 0, 1)   , 20),
 ]
 # fmt: on
+# Maps that share one color scale in each view (the lowest vmin and the largest value of them
+# all): the fluxes, and the doses (kerma); the ratios keep their own fixed scales
+SCALE_GROUP = {
+    "neutron": "flux",
+    "photon": "flux",
+    "si": "flux",
+    "nkerma": "dose",
+    "pkerma": "dose",
+    "kerma": "dose",
+}  # fmt: skip
 # Derived quantities: the total kerma (neutron + photon), and the hardness factor and the fraction
 # above 10 MeV of the neutron flux. The ratios are left blank where the neutron flux is below the
 # floor of the view's flux map, where they are mostly noise
@@ -494,9 +507,18 @@ def plot_flux(results):
             tallies[key] = r.mesh(quantity, plane, view)
         return in_plane(*tallies[key], plane, group)
 
-    for quantity, group, view, (scale, vmin, vmax), tick in FIGURES:
-        maps = {r.name: [panel(r, quantity, group, plane, view) for plane in PLANES]
-                for r in results}  # fmt: skip
+    # Every figure's panels first, for the shared color scales: the lowest vmin and the largest
+    # value of each scale group in each view
+    all_maps = [{r.name: [panel(r, quantity, group, plane, view) for plane in PLANES]
+                 for r in results} for quantity, group, view, *_ in FIGURES]  # fmt: skip
+    shared = {}
+    for (quantity, _, view, (_, vmin, _), _), maps in zip(FIGURES, all_maps):
+        if quantity in SCALE_GROUP:
+            top = max(np.nanmax(flux) for panels in maps.values() for _, flux in panels)
+            lo, hi = shared.get((SCALE_GROUP[quantity], view), (np.inf, 0.0))
+            shared[SCALE_GROUP[quantity], view] = (min(lo, vmin), max(hi, top))
+
+    for (quantity, group, view, (scale, vmin, vmax), tick), maps in zip(FIGURES, all_maps):
         # Where each plane is, across it: the middle of the mesh's single bin across the plane
         across = {}
         for plane in PLANES:
@@ -513,6 +535,8 @@ def plot_flux(results):
         else:
             suffix = f"total_{view}" if quantity == "neutron" else view
         top = max(np.nanmax(flux) for panels in maps.values() for _, flux in panels)
+        if quantity in SCALE_GROUP:
+            vmin, top = shared[SCALE_GROUP[quantity], view]
         norm = (LogNorm if scale == "log" else Normalize)(vmin, top if vmax is None else vmax)
         for name, panels in maps.items():
             # The panels all have the same height, each with its own aspect ratio
