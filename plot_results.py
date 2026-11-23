@@ -91,34 +91,49 @@ DOC_FIGURES = [
 ]
 
 CASSETTE_CELLS = [106, 206]
-SPECTRUM_TALLIES = {"neutron": 14, "photon": 24}
 
+# Tally numbers, the same in every model (see the header of the MCNP decks). The tens digit q of the
+# cell and peak tallies is the quantity; 1q4 are the cell tallies in the cassette regions, and 2q4
+# and 3q4 the peak values in the -x and +x cassette regions. The maps take a hundred per quantity
+# (4xx to 8xx), with the window in the tens digit: 1 to 3 for the xy, xz, and yz planes of the
+# whole view, 4 to 6 for those of the zoomed view.
+Q = {"neutron": 1, "nspectrum": 2, "pspectrum": 3, "si": 4, "nkerma": 5, "pkerma": 6}
+MAP_BASE = {"neutron": 400, "photon": 500, "si": 600, "nkerma": 700, "pkerma": 800}
+WINDOW = {"xy": 1, "xz": 2, "yz": 3}
+SIDES = ["-x", "+x"]
+PEAK_HUNDREDS = {"-x": 200, "+x": 300}
+
+# Spectra in the cassette regions (cells 106 and 206, -x then +x)
+SPECTRUM_TALLIES = {
+    "neutron": 100 + 10 * Q["nspectrum"] + 4,
+    "photon": 100 + 10 * Q["pspectrum"] + 4,
+}
 # The quantities tallied: neutron flux (in energy groups), photon flux, 1-MeV(Si) equivalent
 # neutron flux, and neutron and photon kerma in silicon
 QUANTITIES = ["neutron", "photon", "si", "nkerma", "pkerma"]
-# Cell tallies of the responses in silicon in the cassette regions (cells 106 and 206, -x then +x)
-CELL_TALLIES = {"si": 34, "nkerma": 44, "pkerma": 54}
-# Mesh tallies: each quantity in each plane and view
+# Cell tallies of the responses in silicon in the cassette regions
+CELL_TALLIES = {q: 100 + 10 * Q[q] + 4 for q in ["si", "nkerma", "pkerma"]}
+# Mesh tallies: each quantity in each plane and view (the whole view, then the zoomed one)
 PLANES = ["xy", "xz"]
 VIEWS = ["pit", "cavity"]
 MESH_TALLIES = {
-    (quantity, plane, view): 64 + 10 * ((k * len(VIEWS) + m) * len(PLANES) + n)
-    for k, quantity in enumerate(QUANTITIES)
+    (quantity, plane, view): MAP_BASE[quantity] + 10 * (3 * m + WINDOW[plane]) + 4
+    for quantity in QUANTITIES
     for m, view in enumerate(VIEWS)
-    for n, plane in enumerate(PLANES)
+    for plane in PLANES
 }
 # Peak values in each cassette region: one-bin mesh tallies over a plate as close to the target
 # chamber as a part in the cassette can get (from x = +-7.8 cm), at the height of the peak flux,
 # -x then +x: neutrons in the four groups, the neutron and photon spectra (same bins as the
 # cassette spectra), and the responses in silicon
 PEAK_TALLIES = {
-    "neutron": {"-x": 264, "+x": 274},
-    "si": {"-x": 324, "+x": 334},
-    "nkerma": {"-x": 344, "+x": 354},
-    "pkerma": {"-x": 364, "+x": 374},
+    q: {side: PEAK_HUNDREDS[side] + 10 * Q[q] + 4 for side in SIDES}
+    for q in ["neutron", "si", "nkerma", "pkerma"]
 }
-PEAK_SPECTRUM_TALLIES = {"neutron": [284, 294], "photon": [304, 314]}
-SIDES = ["-x", "+x"]
+PEAK_SPECTRUM_TALLIES = {
+    particle: [PEAK_HUNDREDS[side] + 10 * Q[q] + 4 for side in SIDES]
+    for particle, q in [("neutron", "nspectrum"), ("photon", "pspectrum")]
+}
 
 # Energy groups of the neutron mesh tallies (emesh in the MCNP deck, an energy filter in the
 # OpenMC model): name (in the file names) and title of each, in order of energy

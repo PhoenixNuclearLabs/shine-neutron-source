@@ -632,9 +632,18 @@ QUANTITIES = {
     "nkerma": ("Neutron kerma in silicon", "neutron"),
     "pkerma": ("Photon kerma in silicon", "photon"),
 }
-# Cell tallies (the cassette regions) of the responses in silicon, after the spectra (14 and 24)
-CELL_TALLIES = {"si": 34, "nkerma": 44, "pkerma": 54}
-# Mesh tallies: each quantity in each plot window, from 64 up, then the plates
+# Tally numbers, as in the MCNP deck (see its header). The tens digit q of the cell and peak tallies
+# is the quantity; 1q4 are the cell tallies in the cassette regions, and 2q4 and 3q4 the peak values
+# in the -x and +x cassette regions. The maps take a hundred per quantity (4xx to 8xx), with the
+# window in the tens digit: 1 to 3 for the xy, xz, and yz planes of the pit view, 4 to 6 for those
+# of the cavity view.
+Q = {"neutron": 1, "nspectrum": 2, "pspectrum": 3, "si": 4, "nkerma": 5, "pkerma": 6}
+MAP_BASE = {"neutron": 400, "photon": 500, "si": 600, "nkerma": 700, "pkerma": 800}
+WINDOW = {"xy": 1, "xz": 2, "yz": 3}
+ZOOM = {"pit": 0, "cavity": 3}
+# Cell tallies (the cassette regions) of the responses in silicon, after the spectra
+CELL_TALLIES = {q: 100 + 10 * Q[q] + 4 for q in ["si", "nkerma", "pkerma"]}
+# Mesh tallies: each quantity in each plot window
 MAPS = ["neutron", "photon", "si", "nkerma", "pkerma"]
 
 
@@ -658,19 +667,42 @@ def get_tallies(geom):
         t.scores = ["flux"]
         tallies.append(t)
 
-    tally(14, "Neutron energy spectrum in the cassette regions (CCFE-709)", cassettes,
+    tally(124, "Neutron energy spectrum in the cassette regions (CCFE-709)", cassettes,
           only["neutron"], ccfe)  # fmt: skip
-    tally(24, "Photon energy spectrum in the cassette regions (VITAMIN-J-42)", cassettes,
+    tally(134, "Photon energy spectrum in the cassette regions (VITAMIN-J-42)", cassettes,
           only["photon"], vitamin_j)  # fmt: skip
     for quantity, number in CELL_TALLIES.items():
         name, particle = QUANTITIES[quantity]
         tally(number, f"{name} in the cassette regions", cassettes, only[particle],
               energy[quantity])  # fmt: skip
 
-    number = 64
+    # Peak flux in each cassette region, -x then +x: one-bin meshes over a plate in the cassette
+    # region, for neutrons in the four groups, the neutron spectrum, the photon spectrum, the
+    # 1-MeV(Si) equivalent neutron flux, and the neutron and photon kerma in silicon
+    plates = {}
+    for sign in [-1, +1]:
+        x0, x1 = sorted([sign * PLATE_X, sign * (PLATE_X + PLATE_THICKNESS)])
+        mesh = openmc.RegularMesh(mesh_id=264 + 50 * sign)  # 214 and 314, as their first tallies
+        mesh.lower_left = [x0, -PLATE_WIDTH / 2, Z_PEAK - PLATE_WIDTH / 2]
+        mesh.upper_right = [x1, PLATE_WIDTH / 2, Z_PEAK + PLATE_WIDTH / 2]
+        mesh.dimension = [1, 1, 1]
+        plates[sign] = openmc.MeshFilter(mesh)
+    for hundred, sign, side in [(200, -1, "-x"), (300, +1, "+x")]:
+        for q, what, particle, energy_filter in [
+            ("neutron", "Peak neutron flux", "neutron", groups),
+            ("nspectrum", "Peak neutron spectrum", "neutron", ccfe),
+            ("pspectrum", "Peak photon spectrum", "photon", vitamin_j),
+            ("si", "Peak 1-MeV(Si) equivalent flux", "neutron", energy["si"]),
+            ("nkerma", "Peak neutron kerma in silicon", "neutron", energy["nkerma"]),
+            ("pkerma", "Peak photon kerma in silicon", "photon", energy["pkerma"]),
+        ]:
+            tally(hundred + 10 * Q[q] + 4, f"{what} in the {side} cassette region",
+                  plates[sign], only[particle], energy_filter)  # fmt: skip
+
     for quantity in MAPS:
         name, particle = QUANTITIES[quantity]
         for plane, view in PLOTS:
+            number = MAP_BASE[quantity] + 10 * (ZOOM[view] + WINDOW[plane]) + 4
             origin, extent, _ = read_plot(plane, view)
             mesh = openmc.RegularMesh(mesh_id=number)
             lower, upper, dims = [], [], []
@@ -686,31 +718,6 @@ def get_tallies(geom):
             mesh.lower_left, mesh.upper_right, mesh.dimension = lower, upper, dims
             tally(number, f"{name} in the {plane} plane (as plot_{plane}_{view})",
                   openmc.MeshFilter(mesh), only[particle], energy[quantity])  # fmt: skip
-            number += 10
-
-    # Peak flux in each cassette region, -x then +x: one-bin meshes over a plate in the cassette
-    # region, for neutrons in the four groups, the neutron spectrum, the photon spectrum, the
-    # 1-MeV(Si) equivalent neutron flux, and the neutron and photon kerma in silicon
-    plates = {}
-    for n, sign in [(number, -1), (number + 10, +1)]:
-        x0, x1 = sorted([sign * PLATE_X, sign * (PLATE_X + PLATE_THICKNESS)])
-        mesh = openmc.RegularMesh(mesh_id=n)
-        mesh.lower_left = [x0, -PLATE_WIDTH / 2, Z_PEAK - PLATE_WIDTH / 2]
-        mesh.upper_right = [x1, PLATE_WIDTH / 2, Z_PEAK + PLATE_WIDTH / 2]
-        mesh.dimension = [1, 1, 1]
-        plates[sign] = openmc.MeshFilter(mesh)
-    for what, particle, energy_filter in [
-        ("Peak neutron flux", "neutron", groups),
-        ("Peak neutron spectrum", "neutron", ccfe),
-        ("Peak photon spectrum", "photon", vitamin_j),
-        ("Peak 1-MeV(Si) equivalent flux", "neutron", energy["si"]),
-        ("Peak neutron kerma in silicon", "neutron", energy["nkerma"]),
-        ("Peak photon kerma in silicon", "photon", energy["pkerma"]),
-    ]:
-        for n, sign, side in [(number, -1, "-x"), (number + 10, +1, "+x")]:
-            tally(n, f"{what} in the {side} cassette region", plates[sign], only[particle],
-                  energy_filter)  # fmt: skip
-        number += 20
 
     return openmc.Tallies(tallies)
 

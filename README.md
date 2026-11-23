@@ -116,14 +116,18 @@ Modeling*, with ENDF/B-VIII.1 data: air, aluminum 6061-O, Portland concrete, cop
 earth, stainless steel 304, and water, with thermal scattering data for aluminum, iron, and
 hydrogen in water.
 
-**Tallies** (the same numbers in both models):
+**Tallies** (the same numbers in both models, and in every system's models):
 
 | Tallies | What |
 |---|---|
-| 14, 24 | Neutron spectrum (CCFE-709 groups) and photon spectrum (VITAMIN-J-42) in the cassette regions |
-| 34, 44, 54 | 1-MeV(Si) equivalent neutron flux, neutron kerma in silicon, and photon kerma in silicon, in the cassette regions |
-| 64 to 254 | Maps of the neutron flux (in four energy groups), the photon flux, the 1-MeV(Si) equivalent flux, and the neutron and photon kerma in silicon, in each plot window |
-| 264 to 374 | The same at the peak flux in each cassette region, on a 5 × 5 cm plate, 0.1 cm thick, 7.8 to 7.9 cm from the beam axis (about as close as a part in the cassette can get), at the height of the peak flux (z = 55.88 cm) |
+| 124, 134 | Neutron spectrum (CCFE-709 groups) and photon spectrum (VITAMIN-J-42) in the cassette regions |
+| 144, 154, 164 | 1-MeV(Si) equivalent neutron flux, neutron kerma in silicon, and photon kerma in silicon, in the cassette regions |
+| 214 to 264, 314 to 364 | At the peak flux in the −x and +x cassette regions: the neutron flux in four energy groups, the neutron and photon spectra, and the three responses in silicon, on a 5 × 5 cm plate, 0.1 cm thick, 7.8 to 7.9 cm from the beam axis (about as close as a part in the cassette can get), at the height of the peak flux (z = 55.88 cm) |
+| 4w4 to 8w4 | Maps of the neutron flux in four energy groups (4w4), the photon flux (5w4), the 1-MeV(Si) equivalent flux (6w4), and the neutron and photon kerma in silicon (7w4, 8w4), in each plot window w: 1 and 2 for the xy and xz pit plots, 4 and 5 for the cavity plots |
+
+The tens digit of the cell and peak tallies is the quantity, in the order above (1 for the neutron
+flux in four groups, 2 the neutron spectrum, 3 the photon spectrum, 4 to 6 the responses in
+silicon). Window numbers 3 and 6 are kept for yz plots.
 
 The neutron energy groups of the maps are below 0.5 eV, 0.5 eV to 0.1 MeV, 0.1 to 10 MeV, and
 above 10 MeV.
@@ -225,7 +229,7 @@ Fluxes are per cm² per second and kerma is in rad(Si) per second, at the full n
 
 - **MCNP** tallies are per source neutron; the model multiplies them by the yield with `fm` cards
   (cell tallies) and the `factor` keyword (mesh tallies). If the source changes, change the yield
-  in these, including the constants of the silicon cell tallies 34, 44, and 54, which include it.
+  in these, including the constants of the silicon cell tallies 144, 154, and 164, which include it.
 - **OpenMC** tallies are scaled by the source strength, which beam-target gives in n/s, so they
   are already absolute. Flux tallies are not divided by volume: `plot_results.py` divides the
   cassette tallies by the cells' volumes and the mesh tallies by a mesh element's volume.
