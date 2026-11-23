@@ -11,11 +11,14 @@ and the neutron and photon flux maps of the mesh tallies, from MCNP, OpenMC, or 
     python plot_results.py --mcnp     MCNP results (mcnp/artemis.im and mcnp/artemis.imsht)
     python plot_results.py --openmc   OpenMC results (the latest openmc/statepoint.*.h5)
 
-The plots go in images/, with the geometry plots: artemis_spectrum_<particle>.png, with every
+The plots go in images/, with the geometry plots: artemis_spectrum_<particle>.png and
+artemis_spectrum_peak_<particle>.png (in the cassette regions and at their peak flux), with every
 code given on the same axes, and artemis_<code>_<particle>_flux_<view>.png, for the pit and cavity
 views of the plot command files mcnp/plot_*. The neutron flux is also given in four energy groups
-(NEUTRON_GROUPS), in artemis_<code>_neutron_flux_<group>_<view>.png. Reading MCNP results needs mcnptools (which comes
-with MCNP), and reading OpenMC results needs the openmc Python package.
+(NEUTRON_GROUPS), in artemis_<code>_neutron_flux_<group>_<view>.png. The peak neutron flux in each
+cassette region (PEAK_TALLIES), in each energy group and in total, is printed as a table. Reading
+MCNP results needs mcnptools (which comes with MCNP), and reading OpenMC results needs the openmc
+Python package.
 
 Each flux figure has a panel for each plane of a view (xy and xz), all the same height, with a
 shared color scale (FIGURES), the same for every code given: a vmax of None is the largest value
@@ -68,6 +71,11 @@ MESH_TALLIES = {
     for m, view in enumerate(VIEWS)
     for n, plane in enumerate(PLANES)
 }
+# Peak flux in each cassette region: one-bin mesh tallies over a plate against the cavity wall, at
+# the height of the peak flux: neutrons in the four groups, for each side, and the neutron and
+# photon spectra (same bins as the cassette spectra), -x then +x
+PEAK_TALLIES = {"-x": 114, "+x": 124}
+PEAK_SPECTRUM_TALLIES = {"neutron": [134, 144], "photon": [154, 164]}
 
 # Energy groups of the neutron mesh tallies (emesh in the MCNP deck, an energy filter in the
 # OpenMC model): name (in the file names) and title of each, in order of energy
@@ -185,6 +193,26 @@ class MCNPResults:
         ).mean(axis=0)
         return upper, flux[1:]
 
+    def peak_spectrum(self, particle):
+        """Return (energy edges [MeV], flux in each bin [/cm^2-s]), the mean of the plates."""
+        # The edges from the cassette spectrum, which has the same bins (the meshtal file rounds
+        # them to 3 digits)
+        upper = np.array(self.mctal.GetTally(SPECTRUM_TALLIES[particle]).GetEBins())
+        flux = []
+        for n in PEAK_SPECTRUM_TALLIES[particle]:
+            t = self.meshtal.GetTally(n)
+            assert len(t.GetEBounds()) == len(upper) + 1
+            flux.append([t.GetValue(0, 0, 0, e) for e in range(len(upper))])
+        return upper, np.mean(flux, axis=0)[1:]
+
+    def peak(self, side):
+        """Return (flux [/cm^2-s], relative error) in each energy group and in total (last) of a
+        peak flux tally."""
+        t = self.meshtal.GetTally(PEAK_TALLIES[side])
+        bins = range(len(t.GetEBounds()))  # the groups, then the total
+        return (np.array([t.GetValue(0, 0, 0, e) for e in bins]),
+                np.array([t.GetError(0, 0, 0, e) for e in bins]))  # fmt: skip
+
     def mesh(self, particle, plane, view):
         """Return (edges along x, y, and z [cm], flux[x, y, z, energy group] [/cm^2-s]) of a mesh
         tally."""
@@ -237,6 +265,32 @@ class OpenMCResults:
         edges = t.find_filter(openmc.EnergyFilter).values * 1e-6
         track = t.mean.reshape(len(CASSETTE_CELLS), -1)
         return edges, (track / np.array(self.volumes)[:, None]).mean(axis=0)
+
+    def peak_spectrum(self, particle):
+        """Return (energy edges [MeV], flux in each bin [/cm^2-s]), the mean of the plates."""
+        import openmc
+
+        flux = []
+        for n in PEAK_SPECTRUM_TALLIES[particle]:
+            t = self.statepoint.get_tally(id=n)
+            mesh = t.find_filter(openmc.MeshFilter).mesh
+            volume = np.prod(np.array(mesh.upper_right) - np.array(mesh.lower_left))
+            flux.append(t.mean.ravel() / volume)
+        edges = t.find_filter(openmc.EnergyFilter).values * 1e-6
+        return edges, np.mean(flux, axis=0)
+
+    def peak(self, side):
+        """Return (flux [/cm^2-s], relative error) in each energy group and in total (last) of a
+        peak flux tally. The total's error treats the groups as independent."""
+        import openmc
+
+        t = self.statepoint.get_tally(id=PEAK_TALLIES[side])
+        mesh = t.find_filter(openmc.MeshFilter).mesh
+        volume = np.prod(np.array(mesh.upper_right) - np.array(mesh.lower_left))
+        mean, sd = t.mean.ravel() / volume, t.std_dev.ravel() / volume
+        mean = np.append(mean, mean.sum())
+        sd = np.append(sd, np.sqrt(np.sum(sd**2)))
+        return mean, np.divide(sd, mean, out=np.zeros_like(sd), where=mean > 0)
 
     def mesh(self, particle, plane, view):
         """Return (edges along x, y, and z [cm], flux[x, y, z, energy group] [/cm^2-s]) of a mesh
@@ -373,26 +427,52 @@ def plot_flux(results):
 
 
 def plot_spectra(results):
-    """The cassette spectra, per unit lethargy, with every code on the same axes."""
+    """The spectra in the cassette regions and at their peak flux, per unit lethargy, with every
+    code on the same axes."""
     for particle in ["neutron", "photon"]:
-        fig, ax = plt.subplots(figsize=(8, 6), layout="constrained")
-        for r in results:
-            edges, flux = r.spectrum(particle)
-            ax.stairs(flux / np.log(edges[1:] / edges[:-1]), edges, label=r.name)
-        ax.set_xscale("log")
-        ax.set_yscale("log")
-        ax.set_xlabel(f"{particle.capitalize()} energy [MeV]")
-        ax.set_ylabel(
-            f"{particle.capitalize()} flux per unit lethargy "
-            f"[{'n' if particle == 'neutron' else '$\\gamma$'}/cm$^2$-s]"
-        )
-        ax.set_title(
-            f"Artemis: {particle} spectrum in the cassette regions "
-            f"(mean of cells {CASSETTE_CELLS[0]} and {CASSETTE_CELLS[1]})"
-        )
-        ax.grid(which="major", alpha=0.4)
-        ax.legend()
-        save(fig, f"artemis_spectrum_{particle}.png")
+        for peak in [False, True]:
+            fig, ax = plt.subplots(figsize=(8, 6), layout="constrained")
+            for r in results:
+                edges, flux = r.peak_spectrum(particle) if peak else r.spectrum(particle)
+                ax.stairs(flux / np.log(edges[1:] / edges[:-1]), edges, label=r.name)
+            if peak:
+                where = (
+                    "at the peak flux in the cassette regions\n(mean of the 5 x 5 x 0.1 cm "
+                    "plates against the cavity walls)"
+                )
+            else:
+                where = (
+                    "in the cassette regions "
+                    f"(mean of cells {CASSETTE_CELLS[0]} and {CASSETTE_CELLS[1]})"
+                )
+            finish_spectrum(ax, particle, where)
+            save(fig, f"artemis_spectrum_{'peak_' if peak else ''}{particle}.png")
+
+
+def finish_spectrum(ax, particle, where):
+    """Axes, labels, and legend of a spectrum plot."""
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel(f"{particle.capitalize()} energy [MeV]")
+    ax.set_ylabel(
+        f"{particle.capitalize()} flux per unit lethargy "
+        f"[{'n' if particle == 'neutron' else '$\\gamma$'}/cm$^2$-s]"
+    )
+    ax.set_title(f"Artemis: {particle} spectrum {where}")
+    ax.grid(which="major", alpha=0.4)
+    ax.legend()
+
+
+def print_peak(results):
+    """A table of the peak neutron flux in each cassette region, by energy group and in total."""
+    columns = [title for _, title in NEUTRON_GROUPS] + ["total"]
+    print("\nPeak neutron flux in the cassette regions [n/cm^2-s] (relative error)")
+    print(f"{'':14}" + "".join(f"{c:>24}" for c in columns))
+    for r in results:
+        for side in PEAK_TALLIES:
+            flux, error = r.peak(side)
+            cells = "".join(f"{f'{v:.3e} ({e:.3f})':>24}" for v, e in zip(flux, error))
+            print(f"{f'{r.name} {side}':14}" + cells)
 
 
 def save(fig, name, indexed=False):
@@ -433,6 +513,7 @@ def main():
         results.append(OpenMCResults())
     plot_spectra(results)
     plot_flux(results)
+    print_peak(results)
 
 
 if __name__ == "__main__":

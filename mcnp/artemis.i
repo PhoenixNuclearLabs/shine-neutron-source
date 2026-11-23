@@ -22,7 +22,10 @@ c  ../source/Artemis/summary.toml).
 c
 c  Geometry plots: mcnp6 ip i=artemis.i com=plot_xy_pit (or plot_xz_pit, or
 c  the zoomed plot_xy_cavity and plot_xz_cavity). The mesh tallies cover the
-c  same windows as these plots.
+c  same windows as these plots, except fmesh114 to fmesh164: the peak flux in
+c  each cassette region (neutrons in four groups, the neutron spectrum, and
+c  the photon spectrum), on a 5 x 5 cm plate, 0.1 cm thick, against the
+c  cavity wall at the height of the peak flux.
 c
 c ******************************************************************************
 c
@@ -428,6 +431,70 @@ c
               imesh  =    76.2  iints = 120
               jmesh  =    5.08  jints =   1
               kmesh  =  132.08  kints = 120
+              factor = 1.77562e13
+c
+c     Peak flux in the cassette regions: a 5 x 5 cm plate, 0.1 cm thick, against the
+c     cavity wall around the target chamber, centered at z = 55.88 cm: neutrons in the
+c     four groups, the neutron spectrum (CCFE-709), and the photon spectrum (VITAMIN-J-42)
+c
+  fc114       Peak neutron flux in the -x cassette region
+  fmesh114:n  geom   = xyz
+              origin = -7.16501 -2.5 53.38
+              imesh  = -7.06501  iints =   1
+              jmesh  =      2.5  jints =   1
+              kmesh  =    58.38  kints =   1
+              emesh  = 5e-7 0.1 10 1000
+              factor = 1.77562e13
+c
+  fc124       Peak neutron flux in the +x cassette region
+  fmesh124:n  geom   = xyz
+              origin = 7.06501 -2.5 53.38
+              imesh  =  7.16501  iints =   1
+              jmesh  =      2.5  jints =   1
+              kmesh  =    58.38  kints =   1
+              emesh  = 5e-7 0.1 10 1000
+              factor = 1.77562e13
+c
+  fc134       Peak neutron spectrum in the -x cassette region (CCFE-709)
+  fmesh134:n  geom   = xyz
+              origin = -7.16501 -2.5 53.38
+              imesh  = -7.06501  iints =   1
+              jmesh  =      2.5  jints =   1
+              kmesh  =    58.38  kints =   1
+              emesh  = 1e-11 599ilog 10 49i 20 9i 30 14i 60 3i 80
+                       7i 160 i 200 19i 1000
+              factor = 1.77562e13
+c
+  fc144       Peak neutron spectrum in the +x cassette region (CCFE-709)
+  fmesh144:n  geom   = xyz
+              origin = 7.06501 -2.5 53.38
+              imesh  =  7.16501  iints =   1
+              jmesh  =      2.5  jints =   1
+              kmesh  =    58.38  kints =   1
+              emesh  = 1e-11 599ilog 10 49i 20 9i 30 14i 60 3i 80
+                       7i 160 i 200 19i 1000
+              factor = 1.77562e13
+c
+  fc154       Peak photon spectrum in the -x cassette region (VITAMIN-J-42)
+  fmesh154:p  geom   = xyz
+              origin = -7.16501 -2.5 53.38
+              imesh  = -7.06501  iints =   1
+              jmesh  =      2.5  jints =   1
+              kmesh  =    58.38  kints =   1
+              emesh  = 0.001 0.01 i 0.03 i 0.06 0.07 0.075 0.1 i 0.2 i 0.4
+                       0.45 0.51 0.512 0.6 i 0.8 1 1.33 1.34 i 1.66
+                       2 11i 8 2i 14 20 30 50
+              factor = 1.77562e13
+c
+  fc164       Peak photon spectrum in the +x cassette region (VITAMIN-J-42)
+  fmesh164:p  geom   = xyz
+              origin = 7.06501 -2.5 53.38
+              imesh  =  7.16501  iints =   1
+              jmesh  =      2.5  jints =   1
+              kmesh  =    58.38  kints =   1
+              emesh  = 0.001 0.01 i 0.03 i 0.06 0.07 0.075 0.1 i 0.2 i 0.4
+                       0.45 0.51 0.512 0.6 i 0.8 1 1.33 1.34 i 1.66
+                       2 11i 8 2i 14 20 30 50
               factor = 1.77562e13
 c
 c ------------------------------------------------------------------------------
