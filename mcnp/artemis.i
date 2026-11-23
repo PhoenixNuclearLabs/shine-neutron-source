@@ -693,6 +693,12 @@ c ------------------------------------------------------------------------------
 c     Materials (from the PNNL compendium, ENDF/B-VIII.1)
 c ------------------------------------------------------------------------------
 c
+c         Default data for every material: ENDF/B-VIII.1 neutrons (Lib81, .10c) and
+c         photons (eprdata25, .25p), as the OpenMC model's silicon tables
+c         (../data/silicon_*.txt)
+c
+  m0      nlib=10c  plib=25p
+c
 c         Air (dry, near sea level)
 c         rho = 0.001205 g/cm^3
 c
