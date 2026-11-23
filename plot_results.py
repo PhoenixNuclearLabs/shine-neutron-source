@@ -11,10 +11,10 @@ and the neutron and photon flux maps of the mesh tallies, from MCNP, OpenMC, or 
     python plot_results.py --mcnp     MCNP results (mcnp/artemis.im and mcnp/artemis.imsht)
     python plot_results.py --openmc   OpenMC results (the latest openmc/statepoint.*.h5)
 
-The plots go in images/, with the geometry plots: artemis_spectrum_<particle>.png and
-artemis_spectrum_peak_<particle>.png (in the cassette regions and at their peak flux), with every
-code given on the same axes, and artemis_<code>_<particle>_flux_<view>.png, for the pit and cavity
-views of the plot command files mcnp/plot_*. The neutron flux is also given in four energy groups
+The plots go in images/, with the geometry plots: artemis_spectrum_<particle>.png, the spectra in
+the cassette regions and at their peak flux, with every code given on the same axes, and
+artemis_<code>_<particle>_flux_<view>.png, for the pit and cavity views of the plot command files
+mcnp/plot_*. The neutron flux is also given in four energy groups
 (NEUTRON_GROUPS), in artemis_<code>_neutron_flux_<group>_<view>.png. The peak neutron flux in each
 cassette region (PEAK_TALLIES), in each energy group and in total, is printed as a table. Reading
 MCNP results needs mcnptools (which comes with MCNP), and reading OpenMC results needs the openmc
@@ -26,7 +26,8 @@ in the panels. Anything below vmin is shown in the vmin color instead of being l
 is a contour line at each colorbar tick, labeled with its value and drawn on the colorbar too.
 Material boundaries are drawn on top from the OpenMC geometry plot of the same window
 (images/artemis_openmc_geom_<plane>_<view>.png, made by plot_geometry.py), which shows only
-material boundaries (the MCNP plots also show the boundaries between cells of one material).
+material boundaries (the MCNP plots also show the boundaries between cells of one material). The
+cassette regions, which are air like the cavities around them, have their open sides dashed.
 Each mesh bin is drawn as a solid block. The figures are about as wide as a GitHub page (at 150
 dpi) and are saved as 256-color indexed PNGs, which look the same as full-color ones but are
 much smaller.
@@ -109,9 +110,33 @@ FIGURES = [
 # fmt: on
 UNITS = {"neutron": "n/cm$^2$-s", "photon": r"$\gamma$/cm$^2$-s"}
 
+# Cassette region of the +x cavity (the -x one is its mirror image), as in the models [cm]: a box,
+# outside the cavity wall around the target chamber. It is air, like the cavity around it, so the
+# flux maps draw its open sides as dashed lines (its other sides are walls)
+CASSETTE_X = (1.27, 51.181)
+CASSETTE_Y = 20.32  # half-width
+CASSETTE_Z = (16.51, 94.615)
+CASSETTE_R = 7.06501  # cavity wall around the target chamber
+CASSETTE_STYLE = {"color": "dimgray", "linestyle": (0, (4, 2)), "linewidth": 1.2}
+
 # Contour levels on log scales, in each decade: 1 and 3 for the whole-geometry (pit) views, and 1, 2,
 # and 5 for the closer cavity views (linear scales have them at the colorbar ticks)
 CONTOUR_STEPS = {"pit": [1, 3], "cavity": [1, 2, 5]}
+
+# SHINE brand colors for the spectrum plots: the blue family and the grays (the product-line
+# colors are only for series that are the product lines)
+SHINE = {
+    "dark blue": "#0093FF",
+    "shine blue": "#00CCFF",
+    "dark gray": "#53565A",
+    "mid gray": "#B1B3B3",
+    "light gray": "#CCCCCC",
+    "ink": "#001027",
+}
+SPECTRUM_COLORS = {
+    "peak": {"MCNP": SHINE["dark blue"], "OpenMC": SHINE["shine blue"]},
+    "cassette": {"MCNP": SHINE["dark gray"], "OpenMC": SHINE["mid gray"]},
+}
 
 # Contour line colors: the first N colors of CONTOUR_COLORS_2 (N = number of contour levels), in the
 # order they appear in CONTOUR_COLORS_1
@@ -348,6 +373,21 @@ def geometry_edges(plane, view, width=1):
     return rgba
 
 
+def cassette_sides(plane, at):
+    """The open sides of both cassette regions in a plane at at [cm] across it, as (horizontal,
+    vertical) coordinate pairs of line segments."""
+    (x0, x1), y, (z0, z1) = CASSETTE_X, CASSETTE_Y, CASSETTE_Z
+    segments = []
+    if plane == "xy" and z0 < at < z1:
+        # The sides at +-y and the outer end; the inner end is the cavity walls
+        segments = [([x0, x1], [y, y]), ([x0, x1], [-y, -y]), ([x1, x1], [-y, y])]
+    elif plane == "xz" and abs(at) < y:
+        # The bottom, top, and outer end; the inner end is the cavity wall around the chamber
+        inner = np.sqrt(CASSETTE_R**2 - at**2) if abs(at) < CASSETTE_R else x0
+        segments = [([inner, x1], [z0, z0]), ([inner, x1], [z1, z1]), ([x1, x1], [z0, z1])]
+    return [([sign * x for x in xs], ys) for xs, ys in segments for sign in [1, -1]]
+
+
 def plot_flux(results):
     """One figure per code and entry of FIGURES, with a panel for each plane."""
     tallies = {}  # each mesh tally, read once
@@ -360,6 +400,11 @@ def plot_flux(results):
                 if key not in tallies:
                     tallies[key] = r.mesh(particle, plane, view)
                 maps[r.name].append(in_plane(*tallies[key], plane, group))
+        # Where each plane is, across it: the middle of the mesh's single bin across the plane
+        across = {}
+        for plane in PLANES:
+            edges = tallies[results[0].name, particle, plane, view][0]
+            across[plane] = np.mean(edges[3 - "xyz".index(plane[0]) - "xyz".index(plane[1])][:2])
         title = f"{particle.capitalize()} flux"
         if group is not None:
             title += " " + dict(NEUTRON_GROUPS)[group]
@@ -389,6 +434,10 @@ def plot_flux(results):
                 edges = geometry_edges(plane, view)
                 if edges is not None:
                     ax.imshow(edges, origin="upper", extent=extent)
+                for xs, ys in cassette_sides(plane, across[plane]):
+                    ax.plot(xs, ys, **CASSETTE_STYLE)
+                ax.set_xlim(extent[0], extent[1])
+                ax.set_ylim(extent[2], extent[3])
                 ax.set_title(f"{plane} plane")
                 ax.set_xlabel(f"{plane[0]} [cm]")
                 ax.set_ylabel(f"{plane[1]} [cm]")
@@ -427,40 +476,48 @@ def plot_flux(results):
 
 
 def plot_spectra(results):
-    """The spectra in the cassette regions and at their peak flux, per unit lethargy, with every
-    code on the same axes."""
+    """The spectra in the cassette regions and at their peak flux (on the plates), per unit
+    lethargy, with every code on the same axes, in SHINE colors: blues for the plates, grays for the
+    cassette regions, the darker shade for MCNP."""
     for particle in ["neutron", "photon"]:
-        for peak in [False, True]:
-            fig, ax = plt.subplots(figsize=(8, 6), layout="constrained")
+        fig, ax = plt.subplots(figsize=(8, 6), layout="constrained")
+        for peak in [True, False]:  # the cassette means (smoother) on top
             for r in results:
                 edges, flux = r.peak_spectrum(particle) if peak else r.spectrum(particle)
-                ax.stairs(flux / np.log(edges[1:] / edges[:-1]), edges, label=r.name)
-            if peak:
-                where = (
-                    "at the peak flux in the cassette regions\n(mean of the 5 x 5 x 0.1 cm "
-                    "plates against the cavity walls)"
+                label = (
+                    f"{r.name}, peak (5 x 5 x 0.1 cm plates)"
+                    if peak
+                    else f"{r.name}, cassette regions (cells {CASSETTE_CELLS[0]} and "
+                    f"{CASSETTE_CELLS[1]})"
                 )
-            else:
-                where = (
-                    "in the cassette regions "
-                    f"(mean of cells {CASSETTE_CELLS[0]} and {CASSETTE_CELLS[1]})"
+                ax.stairs(
+                    # Bins with no score are left out (gaps), instead of drops to the axis
+                    np.where(flux > 0, flux, np.nan) / np.log(edges[1:] / edges[:-1]),
+                    edges,
+                    label=label,
+                    color=SPECTRUM_COLORS["peak" if peak else "cassette"][r.name],
+                    linewidth=1.0,
+                    baseline=None,  # no closing lines down to zero at the ends of each run
                 )
-            finish_spectrum(ax, particle, where)
-            save(fig, f"artemis_spectrum_{'peak_' if peak else ''}{particle}.png")
-
-
-def finish_spectrum(ax, particle, where):
-    """Axes, labels, and legend of a spectrum plot."""
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set_xlabel(f"{particle.capitalize()} energy [MeV]")
-    ax.set_ylabel(
-        f"{particle.capitalize()} flux per unit lethargy "
-        f"[{'n' if particle == 'neutron' else '$\\gamma$'}/cm$^2$-s]"
-    )
-    ax.set_title(f"Artemis: {particle} spectrum {where}")
-    ax.grid(which="major", alpha=0.4)
-    ax.legend()
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlabel(f"{particle.capitalize()} energy [MeV]", color=SHINE["dark gray"])
+        ax.set_ylabel(
+            f"{particle.capitalize()} flux per unit lethargy "
+            f"[{'n' if particle == 'neutron' else '$\\gamma$'}/cm$^2$-s]",
+            color=SHINE["dark gray"],
+        )
+        ax.set_title(
+            f"Artemis: {particle} spectrum in the cassette regions (mean of -x and +x)",
+            color=SHINE["ink"],
+        )
+        ax.tick_params(which="both", colors=SHINE["dark gray"])
+        for spine in ax.spines.values():
+            spine.set_color(SHINE["dark gray"])
+        ax.grid(which="major", color=SHINE["light gray"], linewidth=0.6)
+        ax.set_axisbelow(True)
+        ax.legend(loc="upper left")
+        save(fig, f"artemis_spectrum_{particle}.png")
 
 
 def print_peak(results):
