@@ -1,6 +1,5 @@
-# Neutron source term for the target chamber of SHINE's Artemis neutron
-# generator (SHINE Radiation Effects), made with beam-target
-# (https://github.com/lucasjacobson/beam-target).
+# Neutron source term for the target chamber of Artemis, SHINE's neutron generator for SHINE
+# Radiation Effects, made with beam-target (https://github.com/lucasjacobson/beam-target).
 #
 # A 280 keV deuteron beam enters the top of a 137 cm target chamber of 50% tritium and 50%
 # deuterium gas and travels down to the backstop. The gas density is calculated so that the
