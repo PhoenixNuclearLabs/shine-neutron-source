@@ -116,6 +116,8 @@ CELL_TALLIES = {q: 100 + 10 * Q[q] + 4 for q in ["si", "nkerma", "pkerma"]}
 # Mesh tallies: each quantity in each plane and view (the whole view, then the zoomed one)
 PLANES = ["xy", "xz"]
 VIEWS = ["pit", "cavity"]
+# Each view's name in the map titles (the cavity view shows both cavities)
+VIEW_TITLES = {"pit": "pit", "cavity": "cavities"}
 MESH_TALLIES = {
     (quantity, plane, view): MAP_BASE[quantity] + 10 * (3 * m + WINDOW[plane]) + 4
     for quantity in QUANTITIES
@@ -543,8 +545,7 @@ def plot_flux(results):
         title, units, stem = LABELS[quantity]
         if group is not None:
             title += " " + dict(NEUTRON_GROUPS)[group]
-        if view == "cavity":
-            title += " (cavities)"
+        title += f" ({VIEW_TITLES[view]})"
         # The neutron flux in total is named like its energy groups
         if group is not None:
             suffix = f"{group}_{view}"
