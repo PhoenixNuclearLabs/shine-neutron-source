@@ -1,5 +1,5 @@
-/statepoint*.h5
-/summary.h5
-/*.xml
-/run.log
-/__pycache__/
+/*/statepoint*.h5
+/*/summary.h5
+/*/*.xml
+/*/run.log
+/*/__pycache__/

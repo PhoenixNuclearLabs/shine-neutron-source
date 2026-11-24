@@ -1,17 +1,17 @@
 #!/usr/bin/python3
 
 # ******************************************************************************
-# Copyright 2026, SHINE Technologies, LLC. MIT License: see ../LICENSE.
+# Copyright 2026, SHINE Technologies, LLC. MIT License: see ../../LICENSE.
 # ******************************************************************************
 
-# A very simplified model of the Artemis neutron generator, the same as ../mcnp/artemis/artemis.i:
-# the same dimensions, cells, surfaces, materials, and tallies, with the same cell, surface,
-# material, and tally numbers. It holds the target chamber with its double wall, the upstream
-# section of the beamline (the beam tube runs up to the ground), the two irradiation cavities with
-# their cassette regions and ducts, the water pit (full of water up to the ground), its liner, the
-# concrete around it, the earth, and the air above ground. The model is symmetric about x = 0 and
-# y = 0. The backstop is at the origin and the beam travels down (-z); the ground is at z = 289.56
-# cm.
+# A very simplified model of the Artemis neutron generator, the same as
+# ../../mcnp/artemis/artemis.i: the same dimensions, cells, surfaces, materials, and tallies, with
+# the same cell, surface, material, and tally numbers. It holds the target chamber with its double
+# wall, the upstream section of the beamline (the beam tube runs up to the ground), the two
+# irradiation cavities with their cassette regions and ducts, the water pit (full of water up to the
+# ground), its liner, the concrete around it, the earth, and the air above ground. The model is
+# symmetric about x = 0 and y = 0. The backstop is at the origin and the beam travels down (-z);
+# the ground is at z = 289.56 cm.
 #
 # Differences from the MCNP model:
 # - There is no cell for the void outside the model (MCNP cell 999): the outer surfaces of the
@@ -22,17 +22,17 @@
 #   the volume of cells 106 and 206 (the volume of each cell MCNP needs a vol= for is set on the
 #   cell) and the mesh tallies by the volume of a mesh element.
 #
-# The neutron source comes from ../source/Artemis/source.h5, made by beam-target
-# (https://github.com/lucasjacobson/beam-target), and is read with ../source/Artemis/openmc_source.py,
-# which beam-target writes with it, so beam-target need not be installed to run this script. The
-# geometry plots and mesh tallies follow the MCNP plot command files ../mcnp/artemis/plot_*. Set
-# OPENMC_CROSS_SECTIONS to the cross_sections.xml of an ENDF/B-VIII.1 library, the data the MCNP
-# model uses.
+# The neutron source comes from ../../source/Artemis/source.h5, made by beam-target
+# (https://github.com/lucasjacobson/beam-target), and is read with
+# ../../source/Artemis/openmc_source.py, which beam-target writes with it, so beam-target need not
+# be installed to run this script. The geometry plots and mesh tallies follow the MCNP plot command
+# files ../../mcnp/artemis/plot_*. Set OPENMC_CROSS_SECTIONS to the cross_sections.xml of an
+# ENDF/B-VIII.1 library, the data the MCNP model uses.
 #
 # Run it from anywhere; OpenMC's files (model.xml, statepoints, ...) go in this folder:
 #   python artemis.py               write model.xml and run (a statepoint after every batch)
 #   python artemis.py --restart     continue the run from its latest statepoint
-#   python artemis.py --plot        make the geometry plots (../images/artemis/*_openmc_geom_*)
+#   python artemis.py --plot        make the geometry plots (../../images/artemis/*_openmc_geom_*)
 #   python artemis.py --inputs      only write model.xml
 # Add --threads N to use N threads (default: all).
 
@@ -51,7 +51,7 @@ import numpy as np
 import openmc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SOURCE_DIR = os.path.join(HERE, "..", "source", "Artemis")
+SOURCE_DIR = os.path.join(HERE, "..", "..", "source", "Artemis")
 SOURCE_H5 = os.path.join(SOURCE_DIR, "source.h5")
 
 
@@ -66,8 +66,8 @@ def get_openmc_sources(path):
     return module.get_openmc_sources(path)
 
 
-MCNP_DIR = os.path.join(HERE, "..", "mcnp", "artemis")
-IMAGES_DIR = os.path.join(HERE, "..", "images", "artemis")
+MCNP_DIR = os.path.join(HERE, "..", "..", "mcnp", "artemis")
+IMAGES_DIR = os.path.join(HERE, "..", "..", "images", "artemis")
 
 # ------------------------------------------------------------------------------
 # Dimensions [cm]
@@ -537,7 +537,7 @@ def prism_volume(region, surfaces):
 
 # ------------------------------------------------------------------------------
 # Geometry plots and mesh tallies, following the MCNP plot command files
-# ../mcnp/artemis/plot_<plane>_<view>
+# ../../mcnp/artemis/plot_<plane>_<view>
 # ------------------------------------------------------------------------------
 PLOTS = [(plane, view) for view in ["pit", "cavity"] for plane in ["xy", "xz"]]
 
@@ -598,7 +598,7 @@ PLATE_X, PLATE_WIDTH, PLATE_THICKNESS, Z_PEAK = 7.8, 5.0, 0.1, 55.88
 #   the 1 MeV reference of 95 MeV-mb
 # - neutron and photon kerma in silicon [rad(Si)/s]: the flux times the heating cross section (the
 #   total cross section times the heating number) times RAD
-DATA_DIR = os.path.join(HERE, "..", "data")
+DATA_DIR = os.path.join(HERE, "..", "..", "data")
 D_REF = 95e3  # [eV-b]
 A_SI = 28.0855  # [g/mol]
 RAD = 6.02214076e23 / A_SI * 1e-24 * 1.602176634e-8 * 1e-6  # [rad-cm^2 per eV-b]
@@ -772,7 +772,7 @@ def main():
                             tallies=get_tallies(geometry))
     # fmt: on
 
-    # The geometry plots only with --plot: OpenMC checks that their folder (../images/artemis/)
+    # The geometry plots only with --plot: OpenMC checks that their folder (../../images/artemis/)
     # exists before any run that holds them, and doesn't make it
     if args.plot:
         os.makedirs(IMAGES_DIR, exist_ok=True)

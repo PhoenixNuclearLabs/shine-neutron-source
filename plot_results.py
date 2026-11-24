@@ -9,7 +9,7 @@ and the neutron and photon flux maps of the mesh tallies, from MCNP, OpenMC, or 
 
     python plot_results.py            both
     python plot_results.py --mcnp     MCNP results (mcnp/artemis/artemis.im and .imsht)
-    python plot_results.py --openmc   OpenMC results (the latest openmc/statepoint.*.h5)
+    python plot_results.py --openmc   OpenMC results (the latest openmc/artemis/statepoint.*.h5)
 
 The plots go in images/artemis/, with the geometry plots: artemis_spectrum_<particle>.png, the
 spectra in the cassette regions and at their peak flux, with every code given on the same axes,
@@ -74,7 +74,7 @@ plt.rcParams["mathtext.default"] = "regular"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MCNP_DIR = os.path.join(HERE, "mcnp", "artemis")
-OPENMC_DIR = os.path.join(HERE, "openmc")
+OPENMC_DIR = os.path.join(HERE, "openmc", "artemis")
 IMAGES_DIR = os.path.join(HERE, "images", "artemis")
 DOCS_DIR = os.path.join(HERE, "docs", "figures")
 
@@ -367,7 +367,8 @@ class MCNPResults:
 
 
 class OpenMCResults:
-    """OpenMC results: the latest statepoint in openmc/, with the volumes of the model's cells."""
+    """OpenMC results: the latest statepoint in openmc/artemis/, with the volumes of the model's
+    cells."""
 
     name = "OpenMC"
 
@@ -379,7 +380,7 @@ class OpenMCResults:
             key=lambda f: int(f.split(".")[-2]),
         )
         if not files:
-            raise SystemExit(f"No statepoint in {OPENMC_DIR}: run openmc/artemis.py first")
+            raise SystemExit(f"No statepoint in {OPENMC_DIR}: run openmc/artemis/artemis.py first")
         self.statepoint = openmc.StatePoint(files[-1])
         # Cell volumes, from the model (the tallies hold track lengths, not fluxes)
         sys.path.insert(0, OPENMC_DIR)

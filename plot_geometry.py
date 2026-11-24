@@ -16,9 +16,9 @@ The systems are the folders in mcnp/ that hold a deck of their name (mcnp/<syste
 MCNP plots need mcnp6 and Ghostscript (gswin64c on Windows, gs elsewhere) on the PATH, and Pillow:
 the MCNP plotter runs in batch mode on each plot file and writes PostScript, which Ghostscript turns
 into a PNG, cropped to the plot frame (and, for a rectangular window, shrunk back to its shape from
-the square frame MCNP draws it in). OpenMC plots run openmc/<system>.py --plot (it needs OpenMC),
-for the systems that have an OpenMC model. The OpenMC plots also outline the materials in the flux
-maps of plot_results.py.
+the square frame MCNP draws it in). OpenMC plots run openmc/<system>/<system>.py --plot (it needs
+OpenMC), for the systems that have an OpenMC model. The OpenMC plots also outline the materials in
+the flux maps of plot_results.py.
 """
 
 import argparse
@@ -150,7 +150,7 @@ def plot_mcnp(system, dpi):
 
 
 def plot_openmc(system):
-    script = os.path.join(HERE, "openmc", f"{system}.py")
+    script = os.path.join(HERE, "openmc", system, f"{system}.py")
     if not os.path.isfile(script):
         print(f"No OpenMC model for {system} ({os.path.relpath(script, HERE)}): no OpenMC plots")
         return

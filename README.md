@@ -32,7 +32,7 @@ each cavity, as close to the chamber as the cavity wall allows.
 | `source/Artemis/` | The source, all written by beam-target: `source.sdef` (MCNP), `source.h5` and its reader `openmc_source.py` (OpenMC), `summary.toml`, and `plots/` |
 | `mcnp/artemis/artemis.i` | The MCNP model |
 | `mcnp/artemis/plot_*` | MCNP geometry plot commands; the flux maps cover the same windows |
-| `openmc/artemis.py` | The OpenMC model, the same as the MCNP model |
+| `openmc/artemis/artemis.py` | The OpenMC model, the same as the MCNP model |
 | `data/silicon_*.txt` | Responses in silicon for the OpenMC tallies, from the MCNP data (see [Responses in silicon](#responses-in-silicon)) |
 | `plot_geometry.py` | Geometry plots of both models |
 | `plot_results.py` | Spectra, maps, and tables from either code or both |
@@ -57,14 +57,14 @@ each cavity, as close to the chamber as the cavity wall allows.
 cd mcnp/artemis
 mcnp6 n=artemis.i tasks 14
 
-# OpenMC, from anywhere (it writes its files in openmc/)
+# OpenMC, from anywhere (it writes its files in openmc/artemis/)
 export OPENMC_CROSS_SECTIONS=/path/to/endfb-viii.1/cross_sections.xml
-python openmc/artemis.py --threads 14
+python openmc/artemis/artemis.py --threads 14
 ```
 
 The MCNP run writes a restart dump every 10⁷ histories, and the OpenMC run a statepoint after
-every batch (10⁷ histories); `python openmc/artemis.py --restart` continues an OpenMC run from
-its latest statepoint.
+every batch (10⁷ histories); `python openmc/artemis/artemis.py --restart` continues an OpenMC run
+from its latest statepoint.
 
 **Make the plots and tables**, from the top of the repository:
 
