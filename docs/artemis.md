@@ -80,7 +80,7 @@ summary is in [`source/Artemis/summary.toml`](../source/Artemis/summary.toml).
 | Stopping powers | ICRU Report 49 |
 | Cross sections | DROSG-2000: T(d,n)⁴He and D(d,n)³He |
 | Neutron yield | 1.749 × 10¹³ n/s: 99.0% DT, 1.0% DD |
-| Mean neutron energy | 14.00 MeV |
+| Mean neutron energy | 14.00 MeV: 14.11 MeV from DT, 2.55 MeV from DD |
 
 <p align="center">
 <img src="../source/Artemis/plots/neutron_position.png" width="400" />

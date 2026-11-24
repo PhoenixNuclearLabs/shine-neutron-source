@@ -76,7 +76,7 @@ the beam reaches the backstop with 10 keV. The input is
 | Stopping powers | ICRU Report 49 |
 | Cross sections | DROSG-2000: T(d,n)⁴He and D(d,n)³He |
 | Neutron yield | 3.114 × 10¹³ n/s: 99.9% DT, 0.1% DD |
-| Mean neutron energy | 14.10 MeV |
+| Mean neutron energy | 14.10 MeV: 14.11 MeV from DT, 2.55 MeV from DD |
 
 <p align="center">
 <img src="../source/Apollo/plots/neutron_position.png" width="400" />
