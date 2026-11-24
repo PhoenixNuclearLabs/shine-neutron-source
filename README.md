@@ -53,12 +53,24 @@ Each system has its own files, named after it (`<system>` is `artemis` or `apoll
 
 **Requirements**
 
-- MCNP: MCNP 6.3 with the ENDF/B-VIII.1 ACE libraries (Lib81, ENDF81SaB, and eprdata25).
-- OpenMC: OpenMC 0.16 or later with an ENDF/B-VIII.1 library. Each source is read with the
+- **MCNP:** any version of MCNP5 or MCNP6. You might need to replace the thermal scattering
+  tables on the `mt` cards with ones that work with your version of MCNP. MCNP5 also needs the
+  source definition copied into the deck in place of the `read` card, which it does not support.
+- **OpenMC:** OpenMC 0.16 (the version tested). The models need 0.14 or later (the source readers
+  use `IndependentSource`, and Apollo's model uses the `CylindricalMesh` constructor, both new in
+  0.14),  and their geometry plots need 0.16 or later (`SlicePlot`). Each source is read with the
   `openmc_source.py` that beam-target writes with it, so beam-target itself is needed only to
   remake a source.
-- Plots: Python 3.12 or later with numpy, h5py, matplotlib, and Pillow; mcnptools (it comes with
-  MCNP) to read MCNP results; and Ghostscript for the MCNP geometry plots.
+- **Nuclear data:** the results use ENDF/B-VIII.1 (in MCNP, the Lib81, ENDF81SaB, and eprdata25
+  libraries), but any library gives similar results. In MCNP, change the library suffixes on the
+  `m` and `mt` cards and the `plib` on the `m0` card. In OpenMC, point `OPENMC_CROSS_SECTIONS` at
+  it. The responses in silicon come from `data/silicon_*.txt` in OpenMC whatever the library, and
+  in MCNP from the chosen library's silicon (which needs damage energy data, MT 444).
+- **Plots:** Python 3.12 or later with numpy and matplotlib (which brings Pillow); to read MCNP
+  results, [mcnptools](https://github.com/lanl/mcnptools) (built with CMake and a C++ compiler;
+  MCNP itself is not needed); and to read OpenMC results, the openmc package. Remaking the MCNP
+  geometry plots in `images/` needs MCNP and Ghostscript, since the MCNP plotter writes only
+  PostScript; the OpenMC geometry plots need only OpenMC.
 
 **Run the models** (10⁸ histories each, about 1.6 to 1.8 hours per code on 32 cores):
 
