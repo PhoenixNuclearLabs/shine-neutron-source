@@ -221,7 +221,8 @@ SYSTEMS = {
         regions=["-x", "+x"],
         peak_hundreds={"-x": 200, "+x": 300},
         mcnp_bin=0,
-        legend="peak (5 x 5 x 0.1 cm plates, mean of -x and +x)",
+        # On two lines, so the legend clears the annihilation peak at 511 keV
+        legend="peak (5 x 5 x 0.1 cm plates,\nmean of -x and +x)",
         spectrum_title="spectrum at the peak in the cassette regions",
         outline=cassette_sides,
         vmin={("flux", "pit"): 1e6, ("flux", "cavity"): 1e7,
@@ -278,7 +279,9 @@ SHINE = {
     "mid gray": "#B1B3B3",
     "light gray": "#CCCCCC",
 }
-SPECTRUM_COLORS = {"MCNP": SHINE["dark blue"], "OpenMC": SHINE["shine blue"]}
+# MCNP in Dark Blue and OpenMC in Dark Gray, which stand apart where the lines overlap (two blues
+# do not)
+SPECTRUM_COLORS = {"MCNP": SHINE["dark blue"], "OpenMC": SHINE["dark gray"]}
 
 # Contour line colors: the first N colors of CONTOUR_COLORS_2 (N = number of contour levels), in the
 # order they appear in CONTOUR_COLORS_1
@@ -658,8 +661,8 @@ def plot_flux(system, results):
 
 
 def plot_spectra(system, results):
-    """The spectra at the peak, per unit lethargy, with every code on the same axes, in SHINE blues
-    (the darker for MCNP)."""
+    """The spectra at the peak, per unit lethargy, with every code on the same axes, in SHINE colors
+    (SPECTRUM_COLORS)."""
     for particle in ["neutron", "photon"]:
         fig, ax = plt.subplots(figsize=(8, 6), layout="constrained")
         for r in results:
