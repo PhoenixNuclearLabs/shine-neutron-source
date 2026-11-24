@@ -27,8 +27,7 @@ c  95 MeV-mb) and the neutron and photon kerma in silicon [rad(Si)/s]. The
 c  OpenMC model uses the same data, from ../../data/silicon_*.txt.
 c
 c  Geometry plots: mcnp6 ip i=apollo.i com=plot_xy_room (or plot_xz_room,
-c  plot_yz_room, or the zoomed plot_xy_chamber, plot_xz_chamber, and
-c  plot_yz_chamber).
+c  or the zoomed plot_xy_chamber and plot_xz_chamber).
 c
 c  Tally numbers mean the same in every deck of this repository
 c  (mcnp/<system>/<system>.i); a deck leaves out those it has no use for:
@@ -44,8 +43,9 @@ c                1-MeV(Si) equivalent flux (6w4), and the neutron and photon
 c                kerma in silicon (7w4, 8w4)
 c  where q is the quantity (1 neutrons in four groups, 2 the neutron
 c  spectrum, 3 the photon spectrum, 4 the 1-MeV(Si) equivalent flux, 5 and 6
-c  the neutron and photon kerma in silicon) and w the window (1 to 3: the
-c  xy, xz, and yz planes of the room view; 4 to 6: the chamber view).
+c  the neutron and photon kerma in silicon) and w the window (1 and 2: the
+c  xy and xz planes of the room view; 4 and 5: the chamber view; 3 and 6 are
+c  kept for yz planes).
 c
 c ******************************************************************************
 c
@@ -346,15 +346,6 @@ c
               emesh  = 5e-7 0.1 10 1000
               factor = 3.113519e13
 c
-  fc434       Neutron flux, yz plane at x = 0 cm (as plot_yz_room)
-  fmesh434:n  geom   = xyz
-              origin = -5.08 -482.6 -340.36
-              imesh  =    5.08  iints =   1
-              jmesh  =     381  jints = 170
-              kmesh  =   177.8  kints = 102
-              emesh  = 5e-7 0.1 10 1000
-              factor = 3.113519e13
-c
   fc444       Neutron flux, xy plane at z = 55.88 cm (as plot_xy_chamber)
   fmesh444:n  geom   = xyz
               origin = -76.2 -76.2 50.8
@@ -369,15 +360,6 @@ c
               origin = -76.2 -5.08 -20.32
               imesh  =    76.2  iints = 120
               jmesh  =    5.08  jints =   1
-              kmesh  =  132.08  kints = 120
-              emesh  = 5e-7 0.1 10 1000
-              factor = 3.113519e13
-c
-  fc464       Neutron flux, yz plane at x = 0 cm (as plot_yz_chamber)
-  fmesh464:n  geom   = xyz
-              origin = -5.08 -76.2 -20.32
-              imesh  =    5.08  iints =   1
-              jmesh  =    76.2  jints = 120
               kmesh  =  132.08  kints = 120
               emesh  = 5e-7 0.1 10 1000
               factor = 3.113519e13
@@ -400,14 +382,6 @@ c
               kmesh  =   177.8  kints = 102
               factor = 3.113519e13
 c
-  fc534       Photon flux, yz plane at x = 0 cm (as plot_yz_room)
-  fmesh534:p  geom   = xyz
-              origin = -5.08 -482.6 -340.36
-              imesh  =    5.08  iints =   1
-              jmesh  =     381  jints = 170
-              kmesh  =   177.8  kints = 102
-              factor = 3.113519e13
-c
   fc544       Photon flux, xy plane at z = 55.88 cm (as plot_xy_chamber)
   fmesh544:p  geom   = xyz
               origin = -76.2 -76.2 50.8
@@ -421,14 +395,6 @@ c
               origin = -76.2 -5.08 -20.32
               imesh  =    76.2  iints = 120
               jmesh  =    5.08  jints =   1
-              kmesh  =  132.08  kints = 120
-              factor = 3.113519e13
-c
-  fc564       Photon flux, yz plane at x = 0 cm (as plot_yz_chamber)
-  fmesh564:p  geom   = xyz
-              origin = -5.08 -76.2 -20.32
-              imesh  =    5.08  iints =   1
-              jmesh  =    76.2  jints = 120
               kmesh  =  132.08  kints = 120
               factor = 3.113519e13
 c
@@ -452,15 +418,6 @@ c
               factor = 3.113519e13
   fm624       10.5263 311 444
 c
-  fc634       1-MeV(Si) flux, yz plane at x = 0 cm (as plot_yz_room)
-  fmesh634:n  geom   = xyz
-              origin = -5.08 -482.6 -340.36
-              imesh  =    5.08  iints =   1
-              jmesh  =     381  jints = 170
-              kmesh  =   177.8  kints = 102
-              factor = 3.113519e13
-  fm634       10.5263 311 444
-c
   fc644       1-MeV(Si) flux, xy plane at z = 55.88 cm (as plot_xy_chamber)
   fmesh644:n  geom   = xyz
               origin = -76.2 -76.2 50.8
@@ -478,15 +435,6 @@ c
               kmesh  =  132.08  kints = 120
               factor = 3.113519e13
   fm654       10.5263 311 444
-c
-  fc664       1-MeV(Si) flux, yz plane at x = 0 cm (as plot_yz_chamber)
-  fmesh664:n  geom   = xyz
-              origin = -5.08 -76.2 -20.32
-              imesh  =    5.08  iints =   1
-              jmesh  =    76.2  jints = 120
-              kmesh  =  132.08  kints = 120
-              factor = 3.113519e13
-  fm664       10.5263 311 444
 c
 c     Neutron kerma in silicon [rad(Si)/s]
 c
@@ -508,15 +456,6 @@ c
               factor = 3.113519e13
   fm724       3.43541e-10 311 -1 -4
 c
-  fc734       Neutron kerma (Si), yz plane at x = 0 cm (as plot_yz_room)
-  fmesh734:n  geom   = xyz
-              origin = -5.08 -482.6 -340.36
-              imesh  =    5.08  iints =   1
-              jmesh  =     381  jints = 170
-              kmesh  =   177.8  kints = 102
-              factor = 3.113519e13
-  fm734       3.43541e-10 311 -1 -4
-c
   fc744       Neutron kerma (Si), xy plane at z = 55.88 cm (as plot_xy_chamber)
   fmesh744:n  geom   = xyz
               origin = -76.2 -76.2 50.8
@@ -534,15 +473,6 @@ c
               kmesh  =  132.08  kints = 120
               factor = 3.113519e13
   fm754       3.43541e-10 311 -1 -4
-c
-  fc764       Neutron kerma (Si), yz plane at x = 0 cm (as plot_yz_chamber)
-  fmesh764:n  geom   = xyz
-              origin = -5.08 -76.2 -20.32
-              imesh  =    5.08  iints =   1
-              jmesh  =    76.2  jints = 120
-              kmesh  =  132.08  kints = 120
-              factor = 3.113519e13
-  fm764       3.43541e-10 311 -1 -4
 c
 c     Photon kerma in silicon [rad(Si)/s]
 c
@@ -564,15 +494,6 @@ c
               factor = 3.113519e13
   fm824       3.43541e-10 311 -5 -6
 c
-  fc834       Photon kerma (Si), yz plane at x = 0 cm (as plot_yz_room)
-  fmesh834:p  geom   = xyz
-              origin = -5.08 -482.6 -340.36
-              imesh  =    5.08  iints =   1
-              jmesh  =     381  jints = 170
-              kmesh  =   177.8  kints = 102
-              factor = 3.113519e13
-  fm834       3.43541e-10 311 -5 -6
-c
   fc844       Photon kerma (Si), xy plane at z = 55.88 cm (as plot_xy_chamber)
   fmesh844:p  geom   = xyz
               origin = -76.2 -76.2 50.8
@@ -590,15 +511,6 @@ c
               kmesh  =  132.08  kints = 120
               factor = 3.113519e13
   fm854       3.43541e-10 311 -5 -6
-c
-  fc864       Photon kerma (Si), yz plane at x = 0 cm (as plot_yz_chamber)
-  fmesh864:p  geom   = xyz
-              origin = -5.08 -76.2 -20.32
-              imesh  =    5.08  iints =   1
-              jmesh  =    76.2  jints = 120
-              kmesh  =  132.08  kints = 120
-              factor = 3.113519e13
-  fm864       3.43541e-10 311 -5 -6
 c
 c ------------------------------------------------------------------------------
 c     Materials (from the PNNL compendium, ENDF/B-VIII.1)

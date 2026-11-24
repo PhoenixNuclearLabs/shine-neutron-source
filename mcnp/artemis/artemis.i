@@ -40,9 +40,9 @@ c                1-MeV(Si) equivalent flux (6w4), and the neutron and photon
 c                kerma in silicon (7w4, 8w4)
 c  where q is the quantity (1 neutrons in four groups, 2 the neutron
 c  spectrum, 3 the photon spectrum, 4 the 1-MeV(Si) equivalent flux, 5 and 6
-c  the neutron and photon kerma in silicon) and w the window (1 to 3: the
-c  xy, xz, and yz planes of the whole view; 4 to 6: the zoomed view). Artemis
-c  has no yz maps.
+c  the neutron and photon kerma in silicon) and w the window (1 and 2: the
+c  xy and xz planes of the pit view; 4 and 5: the cavity view; 3 and 6 are
+c  kept for yz planes).
 c
 c ******************************************************************************
 c

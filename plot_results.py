@@ -15,7 +15,7 @@ the neutron and photon flux maps of the mesh tallies, from MCNP, OpenMC, or both
 A code whose results are missing is skipped. The plots go in images/<system>/, with the geometry
 plots: <system>_spectrum_<particle>.png, the spectra at the peak, with every code given on the same
 axes, and maps for the whole and zoomed views of the plot command files mcnp/<system>/plot_* (in
-the xy and xz planes; the yz maps are tallied but not plotted), <system>_<code>_<name>.png:
+the xy and xz planes), <system>_<code>_<name>.png:
 
     neutron_flux_total_<view>         neutron flux
     neutron_flux_<group>_<view>       neutron flux in each energy group (NEUTRON_GROUPS)
@@ -83,8 +83,8 @@ DOCS_DIR = os.path.join(HERE, "docs", "figures")
 # Tally numbers, the same in every model (see the header of the MCNP decks). The tens digit q of the
 # peak tallies is the quantity; 2q4 and 3q4 are the peak values (3q4 only in Artemis, for its +x
 # cassette region; Artemis also has cell tallies in its cassette regions, 1q4). The maps take a
-# hundred per quantity (4xx to 8xx), with the window in the tens digit: 1 to 3 for the xy, xz, and
-# yz planes of the whole view, 4 to 6 for those of the zoomed view.
+# hundred per quantity (4xx to 8xx), with the window in the tens digit: 1 and 2 for the xy and xz
+# planes of the whole view, 4 and 5 for those of the zoomed view (3 and 6 are kept for yz planes).
 Q = {"neutron": 1, "nspectrum": 2, "pspectrum": 3, "si": 4, "nkerma": 5, "pkerma": 6}
 MAP_BASE = {"neutron": 400, "photon": 500, "si": 600, "nkerma": 700, "pkerma": 800}
 WINDOW = {"xy": 1, "xz": 2, "yz": 3}
@@ -92,7 +92,7 @@ SPECTRUM_Q = {"neutron": "nspectrum", "photon": "pspectrum"}
 # The quantities mapped: neutron flux (in energy groups), photon flux, 1-MeV(Si) equivalent
 # neutron flux, and neutron and photon kerma in silicon
 QUANTITIES = ["neutron", "photon", "si", "nkerma", "pkerma"]
-# The planes plotted (the yz maps are tallied, but not plotted)
+# The planes mapped
 PLANES = ["xy", "xz"]
 
 # Energy groups of the neutron mesh tallies (emesh in the MCNP decks, an energy filter in the

@@ -28,8 +28,8 @@ system's models, in both codes; a model leaves out those it has no use for. Each
 The tens digit q is the quantity: 1 the neutron flux in four groups, 2 the neutron spectrum
 (CCFE-709 groups), 3 the photon spectrum (VITAMIN-J-42), 4 the 1-MeV(Si) equivalent flux, and 5
 and 6 the neutron and photon kerma in silicon. The tens digit w of the maps is the plot window: 1
-to 3 for the xy, xz, and yz planes of the whole view (Artemis's pit, Apollo's room), and 4 to 6 for
-those of the zoomed view (Artemis's cavities, Apollo's chamber). The neutron energy groups are
+and 2 for the xy and xz planes of the whole view (Artemis's pit, Apollo's room), and 4 and 5 for
+those of the zoomed view (Artemis's cavities, Apollo's chamber); 3 and 6 are kept for yz planes. The neutron energy groups are
 below 0.5 eV, 0.5 eV to 0.1 MeV, 0.1 to 10 MeV, and above 10 MeV.
 
 ## Responses in silicon

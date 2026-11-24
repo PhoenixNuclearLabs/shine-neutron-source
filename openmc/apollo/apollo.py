@@ -443,7 +443,7 @@ def prism_volume(region, surfaces):
 # Geometry plots and mesh tallies, following the MCNP plot command files
 # ../../mcnp/apollo/plot_<plane>_<view>
 # ------------------------------------------------------------------------------
-PLOTS = [(plane, view) for view in ["room", "chamber"] for plane in ["xy", "xz", "yz"]]
+PLOTS = [(plane, view) for view in ["room", "chamber"] for plane in ["xy", "xz"]]
 
 
 @functools.cache
@@ -537,8 +537,8 @@ QUANTITIES = {
 }
 # Tally numbers, as in the MCNP deck (see its header). The tens digit q of the peak tallies (2q4) is
 # the quantity. The maps take a hundred per quantity (4xx to 8xx), with the window in the tens
-# digit: 1 to 3 for the xy, xz, and yz planes of the room view, 4 to 6 for those of the chamber
-# view.
+# digit: 1 and 2 for the xy and xz planes of the room view, 4 and 5 for those of the chamber view
+# (3 and 6 are kept for yz planes).
 Q = {"neutron": 1, "nspectrum": 2, "pspectrum": 3, "si": 4, "nkerma": 5, "pkerma": 6}
 MAP_BASE = {"neutron": 400, "photon": 500, "si": 600, "nkerma": 700, "pkerma": 800}
 WINDOW = {"xy": 1, "xz": 2, "yz": 3}

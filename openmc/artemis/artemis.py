@@ -635,8 +635,8 @@ QUANTITIES = {
 # Tally numbers, as in the MCNP deck (see its header). The tens digit q of the cell and peak tallies
 # is the quantity; 1q4 are the cell tallies in the cassette regions, and 2q4 and 3q4 the peak values
 # in the -x and +x cassette regions. The maps take a hundred per quantity (4xx to 8xx), with the
-# window in the tens digit: 1 to 3 for the xy, xz, and yz planes of the pit view, 4 to 6 for those
-# of the cavity view.
+# window in the tens digit: 1 and 2 for the xy and xz planes of the pit view, 4 and 5 for those of
+# the cavity view (3 and 6 are kept for yz planes).
 Q = {"neutron": 1, "nspectrum": 2, "pspectrum": 3, "si": 4, "nkerma": 5, "pkerma": 6}
 MAP_BASE = {"neutron": 400, "photon": 500, "si": 600, "nkerma": 700, "pkerma": 800}
 WINDOW = {"xy": 1, "xz": 2, "yz": 3}

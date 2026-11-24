@@ -59,7 +59,7 @@ the shell is the second radial bin.
 | Tallies | What |
 |---|---|
 | 214 to 264 | At the peak: the neutron flux in four energy groups, the neutron and photon spectra, and the three responses in silicon |
-| 4w4 to 8w4 | Maps of each quantity in each plot window w: 1 to 3 for the xy, xz, and yz room plots, 4 to 6 for the chamber plots (the yz maps are tallied but not plotted) |
+| 4w4 to 8w4 | Maps of each quantity in each plot window w: 1 and 2 for the xy and xz room plots, 4 and 5 for the chamber plots |
 
 ## The source
 
