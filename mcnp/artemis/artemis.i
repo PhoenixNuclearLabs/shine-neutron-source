@@ -392,18 +392,18 @@ c
   fc214       Peak neutron flux in the -x cassette region
   fmesh214:n  geom   = xyz
               origin = -7.9 -2.5 53.38
-              imesh  =     -7.8  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =  -7.8   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               emesh  = 5e-7 0.1 10 1000
               factor = 1.748845e13
 c
   fc224       Peak neutron spectrum in the -x cassette region (CCFE-709)
   fmesh224:n  geom   = xyz
               origin = -7.9 -2.5 53.38
-              imesh  =     -7.8  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =  -7.8   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               emesh  = 1e-11 599ilog 10 49i 20 9i 30 14i 60 3i 80
                        7i 160 i 200 19i 1000
               factor = 1.748845e13
@@ -411,9 +411,9 @@ c
   fc234       Peak photon spectrum in the -x cassette region (VITAMIN-J-42)
   fmesh234:p  geom   = xyz
               origin = -7.9 -2.5 53.38
-              imesh  =     -7.8  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =  -7.8   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               emesh  = 0.001 0.01 i 0.03 i 0.06 0.07 0.075 0.1 i 0.2 i 0.4
                        0.45 0.51 0.512 0.6 i 0.8 1 1.33 1.34 i 1.66
                        2 11i 8 2i 14 20 30 50
@@ -422,45 +422,45 @@ c
   fc244       Peak 1-MeV(Si) equivalent flux in the -x cassette region
   fmesh244:n  geom   = xyz
               origin = -7.9 -2.5 53.38
-              imesh  =     -7.8  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =  -7.8   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               factor = 1.748845e13
   fm244       10.5263 311 444
 c
   fc254       Peak neutron kerma in silicon in the -x cassette region
   fmesh254:n  geom   = xyz
               origin = -7.9 -2.5 53.38
-              imesh  =     -7.8  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =  -7.8   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               factor = 1.748845e13
   fm254       3.43541e-10 311 -1 -4
 c
   fc264       Peak photon kerma in silicon in the -x cassette region
   fmesh264:p  geom   = xyz
               origin = -7.9 -2.5 53.38
-              imesh  =     -7.8  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =  -7.8   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               factor = 1.748845e13
   fm264       3.43541e-10 311 -5 -6
 c
   fc314       Peak neutron flux in the +x cassette region
   fmesh314:n  geom   = xyz
               origin = 7.8 -2.5 53.38
-              imesh  =      7.9  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =   7.9   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               emesh  = 5e-7 0.1 10 1000
               factor = 1.748845e13
 c
   fc324       Peak neutron spectrum in the +x cassette region (CCFE-709)
   fmesh324:n  geom   = xyz
               origin = 7.8 -2.5 53.38
-              imesh  =      7.9  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =   7.9   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               emesh  = 1e-11 599ilog 10 49i 20 9i 30 14i 60 3i 80
                        7i 160 i 200 19i 1000
               factor = 1.748845e13
@@ -468,9 +468,9 @@ c
   fc334       Peak photon spectrum in the +x cassette region (VITAMIN-J-42)
   fmesh334:p  geom   = xyz
               origin = 7.8 -2.5 53.38
-              imesh  =      7.9  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =   7.9   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               emesh  = 0.001 0.01 i 0.03 i 0.06 0.07 0.075 0.1 i 0.2 i 0.4
                        0.45 0.51 0.512 0.6 i 0.8 1 1.33 1.34 i 1.66
                        2 11i 8 2i 14 20 30 50
@@ -479,27 +479,27 @@ c
   fc344       Peak 1-MeV(Si) equivalent flux in the +x cassette region
   fmesh344:n  geom   = xyz
               origin = 7.8 -2.5 53.38
-              imesh  =      7.9  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =   7.9   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               factor = 1.748845e13
   fm344       10.5263 311 444
 c
   fc354       Peak neutron kerma in silicon in the +x cassette region
   fmesh354:n  geom   = xyz
               origin = 7.8 -2.5 53.38
-              imesh  =      7.9  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =   7.9   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               factor = 1.748845e13
   fm354       3.43541e-10 311 -1 -4
 c
   fc364       Peak photon kerma in silicon in the +x cassette region
   fmesh364:p  geom   = xyz
               origin = 7.8 -2.5 53.38
-              imesh  =      7.9  iints =   1
-              jmesh  =      2.5  jints =   1
-              kmesh  =    58.38  kints =   1
+              imesh  =   7.9   iints =   1
+              jmesh  =   2.5   jints =   1
+              kmesh  =  58.38  kints =   1
               factor = 1.748845e13
   fm364       3.43541e-10 311 -5 -6
 c
@@ -508,36 +508,36 @@ c
   fc414       Neutron flux, xy plane at z = 55.88 cm (as plot_xy_pit)
   fmesh414:n  geom   = xyz
               origin = -243.84 -243.84 50.8
-              imesh  =  243.84  iints = 192
-              jmesh  =  243.84  jints = 192
-              kmesh  =   60.96  kints =   1
+              imesh  = 243.84  iints = 192
+              jmesh  = 243.84  jints = 192
+              kmesh  =  60.96  kints =   1
               emesh  = 5e-7 0.1 10 1000
               factor = 1.748845e13
 c
   fc424       Neutron flux, xz plane at y = 0 cm (as plot_xz_pit)
   fmesh424:n  geom   = xyz
               origin = -243.84 -5.08 -187.96
-              imesh  =  243.84  iints = 192
-              jmesh  =    5.08  jints =   1
-              kmesh  =  299.72  kints = 192
+              imesh  = 243.84  iints = 192
+              jmesh  =   5.08  jints =   1
+              kmesh  = 299.72  kints = 192
               emesh  = 5e-7 0.1 10 1000
               factor = 1.748845e13
 c
   fc444       Neutron flux, xy plane at z = 55.88 cm (as plot_xy_cavity)
   fmesh444:n  geom   = xyz
               origin = -76.2 -76.2 50.8
-              imesh  =    76.2  iints = 120
-              jmesh  =    76.2  jints = 120
-              kmesh  =   60.96  kints =   1
+              imesh  =  76.2   iints = 120
+              jmesh  =  76.2   jints = 120
+              kmesh  =  60.96  kints =   1
               emesh  = 5e-7 0.1 10 1000
               factor = 1.748845e13
 c
   fc454       Neutron flux, xz plane at y = 0 cm (as plot_xz_cavity)
   fmesh454:n  geom   = xyz
               origin = -76.2 -5.08 -20.32
-              imesh  =    76.2  iints = 120
-              jmesh  =    5.08  jints =   1
-              kmesh  =  132.08  kints = 120
+              imesh  =  76.2   iints = 120
+              jmesh  =   5.08  jints =   1
+              kmesh  = 132.08  kints = 120
               emesh  = 5e-7 0.1 10 1000
               factor = 1.748845e13
 c
@@ -546,33 +546,33 @@ c
   fc514       Photon flux, xy plane at z = 55.88 cm (as plot_xy_pit)
   fmesh514:p  geom   = xyz
               origin = -243.84 -243.84 50.8
-              imesh  =  243.84  iints = 192
-              jmesh  =  243.84  jints = 192
-              kmesh  =   60.96  kints =   1
+              imesh  = 243.84  iints = 192
+              jmesh  = 243.84  jints = 192
+              kmesh  =  60.96  kints =   1
               factor = 1.748845e13
 c
   fc524       Photon flux, xz plane at y = 0 cm (as plot_xz_pit)
   fmesh524:p  geom   = xyz
               origin = -243.84 -5.08 -187.96
-              imesh  =  243.84  iints = 192
-              jmesh  =    5.08  jints =   1
-              kmesh  =  299.72  kints = 192
+              imesh  = 243.84  iints = 192
+              jmesh  =   5.08  jints =   1
+              kmesh  = 299.72  kints = 192
               factor = 1.748845e13
 c
   fc544       Photon flux, xy plane at z = 55.88 cm (as plot_xy_cavity)
   fmesh544:p  geom   = xyz
               origin = -76.2 -76.2 50.8
-              imesh  =    76.2  iints = 120
-              jmesh  =    76.2  jints = 120
-              kmesh  =   60.96  kints =   1
+              imesh  =  76.2   iints = 120
+              jmesh  =  76.2   jints = 120
+              kmesh  =  60.96  kints =   1
               factor = 1.748845e13
 c
   fc554       Photon flux, xz plane at y = 0 cm (as plot_xz_cavity)
   fmesh554:p  geom   = xyz
               origin = -76.2 -5.08 -20.32
-              imesh  =    76.2  iints = 120
-              jmesh  =    5.08  jints =   1
-              kmesh  =  132.08  kints = 120
+              imesh  =  76.2   iints = 120
+              jmesh  =   5.08  jints =   1
+              kmesh  = 132.08  kints = 120
               factor = 1.748845e13
 c
 c     1-MeV(Si) equivalent neutron flux
@@ -580,36 +580,36 @@ c
   fc614       1-MeV(Si) flux, xy plane at z = 55.88 cm (as plot_xy_pit)
   fmesh614:n  geom   = xyz
               origin = -243.84 -243.84 50.8
-              imesh  =  243.84  iints = 192
-              jmesh  =  243.84  jints = 192
-              kmesh  =   60.96  kints =   1
+              imesh  = 243.84  iints = 192
+              jmesh  = 243.84  jints = 192
+              kmesh  =  60.96  kints =   1
               factor = 1.748845e13
   fm614       10.5263 311 444
 c
   fc624       1-MeV(Si) flux, xz plane at y = 0 cm (as plot_xz_pit)
   fmesh624:n  geom   = xyz
               origin = -243.84 -5.08 -187.96
-              imesh  =  243.84  iints = 192
-              jmesh  =    5.08  jints =   1
-              kmesh  =  299.72  kints = 192
+              imesh  = 243.84  iints = 192
+              jmesh  =   5.08  jints =   1
+              kmesh  = 299.72  kints = 192
               factor = 1.748845e13
   fm624       10.5263 311 444
 c
   fc644       1-MeV(Si) flux, xy plane at z = 55.88 cm (as plot_xy_cavity)
   fmesh644:n  geom   = xyz
               origin = -76.2 -76.2 50.8
-              imesh  =    76.2  iints = 120
-              jmesh  =    76.2  jints = 120
-              kmesh  =   60.96  kints =   1
+              imesh  =  76.2   iints = 120
+              jmesh  =  76.2   jints = 120
+              kmesh  =  60.96  kints =   1
               factor = 1.748845e13
   fm644       10.5263 311 444
 c
   fc654       1-MeV(Si) flux, xz plane at y = 0 cm (as plot_xz_cavity)
   fmesh654:n  geom   = xyz
               origin = -76.2 -5.08 -20.32
-              imesh  =    76.2  iints = 120
-              jmesh  =    5.08  jints =   1
-              kmesh  =  132.08  kints = 120
+              imesh  =  76.2   iints = 120
+              jmesh  =   5.08  jints =   1
+              kmesh  = 132.08  kints = 120
               factor = 1.748845e13
   fm654       10.5263 311 444
 c
@@ -618,36 +618,36 @@ c
   fc714       Neutron kerma (Si), xy plane at z = 55.88 cm (as plot_xy_pit)
   fmesh714:n  geom   = xyz
               origin = -243.84 -243.84 50.8
-              imesh  =  243.84  iints = 192
-              jmesh  =  243.84  jints = 192
-              kmesh  =   60.96  kints =   1
+              imesh  = 243.84  iints = 192
+              jmesh  = 243.84  jints = 192
+              kmesh  =  60.96  kints =   1
               factor = 1.748845e13
   fm714       3.43541e-10 311 -1 -4
 c
   fc724       Neutron kerma (Si), xz plane at y = 0 cm (as plot_xz_pit)
   fmesh724:n  geom   = xyz
               origin = -243.84 -5.08 -187.96
-              imesh  =  243.84  iints = 192
-              jmesh  =    5.08  jints =   1
-              kmesh  =  299.72  kints = 192
+              imesh  = 243.84  iints = 192
+              jmesh  =   5.08  jints =   1
+              kmesh  = 299.72  kints = 192
               factor = 1.748845e13
   fm724       3.43541e-10 311 -1 -4
 c
   fc744       Neutron kerma (Si), xy plane at z = 55.88 cm (as plot_xy_cavity)
   fmesh744:n  geom   = xyz
               origin = -76.2 -76.2 50.8
-              imesh  =    76.2  iints = 120
-              jmesh  =    76.2  jints = 120
-              kmesh  =   60.96  kints =   1
+              imesh  =  76.2   iints = 120
+              jmesh  =  76.2   jints = 120
+              kmesh  =  60.96  kints =   1
               factor = 1.748845e13
   fm744       3.43541e-10 311 -1 -4
 c
   fc754       Neutron kerma (Si), xz plane at y = 0 cm (as plot_xz_cavity)
   fmesh754:n  geom   = xyz
               origin = -76.2 -5.08 -20.32
-              imesh  =    76.2  iints = 120
-              jmesh  =    5.08  jints =   1
-              kmesh  =  132.08  kints = 120
+              imesh  =  76.2   iints = 120
+              jmesh  =   5.08  jints =   1
+              kmesh  = 132.08  kints = 120
               factor = 1.748845e13
   fm754       3.43541e-10 311 -1 -4
 c
@@ -656,36 +656,36 @@ c
   fc814       Photon kerma (Si), xy plane at z = 55.88 cm (as plot_xy_pit)
   fmesh814:p  geom   = xyz
               origin = -243.84 -243.84 50.8
-              imesh  =  243.84  iints = 192
-              jmesh  =  243.84  jints = 192
-              kmesh  =   60.96  kints =   1
+              imesh  = 243.84  iints = 192
+              jmesh  = 243.84  jints = 192
+              kmesh  =  60.96  kints =   1
               factor = 1.748845e13
   fm814       3.43541e-10 311 -5 -6
 c
   fc824       Photon kerma (Si), xz plane at y = 0 cm (as plot_xz_pit)
   fmesh824:p  geom   = xyz
               origin = -243.84 -5.08 -187.96
-              imesh  =  243.84  iints = 192
-              jmesh  =    5.08  jints =   1
-              kmesh  =  299.72  kints = 192
+              imesh  = 243.84  iints = 192
+              jmesh  =   5.08  jints =   1
+              kmesh  = 299.72  kints = 192
               factor = 1.748845e13
   fm824       3.43541e-10 311 -5 -6
 c
   fc844       Photon kerma (Si), xy plane at z = 55.88 cm (as plot_xy_cavity)
   fmesh844:p  geom   = xyz
               origin = -76.2 -76.2 50.8
-              imesh  =    76.2  iints = 120
-              jmesh  =    76.2  jints = 120
-              kmesh  =   60.96  kints =   1
+              imesh  =  76.2   iints = 120
+              jmesh  =  76.2   jints = 120
+              kmesh  =  60.96  kints =   1
               factor = 1.748845e13
   fm844       3.43541e-10 311 -5 -6
 c
   fc854       Photon kerma (Si), xz plane at y = 0 cm (as plot_xz_cavity)
   fmesh854:p  geom   = xyz
               origin = -76.2 -5.08 -20.32
-              imesh  =    76.2  iints = 120
-              jmesh  =    5.08  jints =   1
-              kmesh  =  132.08  kints = 120
+              imesh  =  76.2   iints = 120
+              jmesh  =   5.08  jints =   1
+              kmesh  = 132.08  kints = 120
               factor = 1.748845e13
   fm854       3.43541e-10 311 -5 -6
 c
