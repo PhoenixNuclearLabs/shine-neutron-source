@@ -1,2 +1,3 @@
 /images/*/*.png
 !/images/*/*_geom_*.png
+__pycache__/

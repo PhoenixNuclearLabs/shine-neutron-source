@@ -1,0 +1,67 @@
+# Neutron source summary (TOML; read it in Python with tomllib)
+
+[run]
+name                    = "Apollo"
+code_version            = "cbd4ed1c2c64a419f4e131b66abe885508f0cd3a"
+code_url                = "https://github.com/lucasjacobson/beam-target"
+created                 = "2026-11-23T18:49:50+00:00"
+input_file              = "source/apollo.toml"
+sdef_direction          = "-z"
+sdef_entry_position     = [0.0, 0.0, 137.0]
+sdef_backstop_position  = [0.0, 0.0, 0.0]
+
+[inputs]
+beam                    = "deuteron"       # beam particle
+beam_energy_entry       = 280.0            # keV
+beam_current            = 45.0             # mA
+region                  = ["chamber"]      # per region: names (if any)
+material                = ["DT90"]         # per region; see [materials]
+pressure                = [nan]            # torr; nan where unused
+temperature             = [nan]            # degC; nan where unused
+density                 = [1.705146e-06]   # g/cm3, calculated for region 1; nan where unused
+length                  = [137.0]          # cm
+beam_energy_backstop    = 10.0             # keV, requested
+beam_radius_entry       = 0.2              # cm
+wall_radius             = [4.1783]         # cm
+divergence              = [36.0]           # mrad
+position_bins           = [137]
+position_substeps       = [10]             # per position bin
+angle_bin_width         = 1.0              # deg
+energy_bin_width        = 0.01             # MeV
+stopping_power          = "icru49"
+nuclear_data            = ["drosg"]        # libraries, searched in order
+nuclear_data_dirs       = ["drosg"]        # where they were found
+
+[results]
+yield_total             = 3.113519e+13     # n/s
+yield_DD                = 3.325614e+10     # n/s, D(d,n)3He
+yield_DT                = 3.110193e+13     # n/s, T(d,n)4He
+fraction_DD             = 0.001068121      # share of the total yield
+fraction_DT             = 0.9989319        # share of the total yield
+mean_neutron_energy     = 14.10147         # MeV, all reactions and angles
+mean_neutron_energy_DD  = 2.547378         # MeV, over all angles
+mean_neutron_energy_DT  = 14.11383         # MeV, over all angles
+atom_density            = [3.521653e+17]   # atoms/cm3, in each region
+beam_energy_region_end  = [10.0]           # keV, at the end of each region
+beam_energy_backstop    = 10.0             # keV
+beam_radius_backstop    = 4.1783           # cm, beam edge; capped at the wall
+beam_current_backstop   = 29.82898         # mA, after scraping and nuclear losses
+beam_power_entry        = 12.6             # kW
+beam_power_deposited    = 11.83846         # kW, deposited in the target material (gas or solid)
+beam_power_wall         = 0.4632528        # kW, carried onto the wall by scraping
+beam_power_backstop     = 0.2982898        # kW
+beam_power_nuclear      = 0.0              # kW, of the deposited power: beam lost to nuclear reactions
+beam_nuclear_loss       = 0.0              # fraction of the beam removed by nuclear reactions
+neutron_scrape_fraction = 0.00264396       # neutrons lost to scraping
+
+[materials.DT90]
+phase                   = "gas"
+molecules               = { D2 = 0.1, T2 = 0.9 }
+
+[reactions.DD]
+reaction                = "D(d,n)3He"
+data                    = "DROSG-2000 v12.01, d2hags.koe"
+
+[reactions.DT]
+reaction                = "T(d,n)4He"
+data                    = "DROSG-2000 v12.01, d3hags.koe"

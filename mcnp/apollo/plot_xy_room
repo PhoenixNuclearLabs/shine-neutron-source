@@ -1,0 +1,15 @@
+origin  10000 10000 10000
+label   0 0
+color   500
+
+shade     4   LightBlue    $ Air
+shade   108   SlateGray    $ Concrete
+shade   112   DeepPink     $ Copper
+shade   116   sienna       $ Earth
+shade   275   burlywood    $ Polyethylene
+shade   331   DarkOrchid   $ SS304
+shade   392   DodgerBlue   $ Water
+
+basis   1 0 0 0 1 0
+extent  711.2 482.6
+origin  -86.36 0 55.88

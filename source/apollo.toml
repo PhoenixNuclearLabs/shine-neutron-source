@@ -1,0 +1,40 @@
+# Neutron source term for the target chamber of Apollo, SHINE's neutron generator for UKAEA (the
+# UK Atomic Energy Authority), made with beam-target (https://github.com/lucasjacobson/beam-target).
+#
+# A 280 keV deuteron beam enters the top of a 137 cm target chamber of 90% tritium and 10%
+# deuterium gas and travels down to the backstop. The gas density is calculated so that the
+# beam reaches the backstop with 10 keV. The source is placed with the backstop at the origin
+# and the chamber along +z, as in the MCNP and OpenMC models.
+#
+# Run from the top of the repository with:
+#
+#   beam-target source/apollo.toml -o source
+#
+# which writes the source to source/Apollo/.
+
+[materials.DT90]
+phase     = "gas"
+molecules = { D2 = 0.1, T2 = 0.9 }  # mole fractions of the molecules
+
+# The target chamber: no pressure, temperature, or density, so its density is calculated
+# from beam_energy_backstop. 3.29 inch (8.3566 cm) inner diameter.
+[regions.chamber]
+material      = "DT90"
+length        = "137 cm"
+wall_radius   = "4.1783 cm"
+divergence    = "36 mrad"
+position_bins = 137  # 1 cm each
+
+[cases.Apollo]
+beam                 = "deuteron"
+regions              = ["chamber"]
+beam_energy_entry    = "280 keV"
+beam_energy_backstop = "10 keV"
+beam_current         = "45 mA"
+beam_radius_entry    = "0.2 cm"  # 0.4 cm diameter
+angle_bin_width      = "1 deg"
+energy_bin_width     = "0.01 MeV"
+stopping_power       = "icru49"
+nuclear_data         = ["drosg"]
+beam_direction       = "-z"
+backstop_position    = ["0 cm", "0 cm", "0 cm"]
