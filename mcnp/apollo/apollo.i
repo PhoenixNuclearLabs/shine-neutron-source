@@ -32,11 +32,7 @@ c  plot_yz_chamber).
 c
 c  Tally numbers mean the same in every deck of this repository
 c  (mcnp/<system>/<system>.i); a deck leaves out those it has no use for:
-c    1q4         averages over the irradiation volume: in Apollo, a
-c                cylindrical shell around the target chamber from r = 4.9 to
-c                25.4 cm and z = 16.51 to 94.615 cm (152.4 liters, about the
-c                volume of one of Artemis's cassette regions), the second
-c                radial bin
+c    1q4         cell tallies in Artemis's cassette regions (Artemis only)
 c    2q4         peak values: in Apollo, around the target chamber, in a
 c                cylindrical shell from r = 4.9 to 5 cm (against the
 c                chamber's outer wall), 5 cm tall, at the height of the peak
@@ -254,70 +250,6 @@ c
 c ------------------------------------------------------------------------------
 c     Mesh tallies
 c ------------------------------------------------------------------------------
-c
-c     Irradiation volume around the target chamber (Apollo's counterpart of Artemis's cassette
-c     regions): a cylindrical shell from r = 4.9 to 25.4 cm and z = 16.51 to 94.615 cm, 152.4 liters,
-c     the second radial bin (the first is inside it): the neutron spectrum (CCFE-709), the photon
-c     spectrum (VITAMIN-J-42), the 1-MeV(Si) equivalent neutron flux, and the neutron and photon
-c     kerma in silicon
-c
-  fc124       Neutron energy spectrum in the irradiation volume (CCFE-709)
-  fmesh124:n  geom   = cyl
-              origin = 0 0 16.51
-              axs    = 0 0 1
-              vec    = 1 0 0
-              imesh  = 4.9 25.4  iints = 1 1
-              jmesh  = 78.105    jints = 1
-              kmesh  = 1         kints = 1
-              emesh  = 1e-11 599ilog 10 49i 20 9i 30 14i 60 3i 80
-                       7i 160 i 200 19i 1000
-              factor = 3.113519e13
-c
-  fc134       Photon energy spectrum in the irradiation volume (VITAMIN-J-42)
-  fmesh134:p  geom   = cyl
-              origin = 0 0 16.51
-              axs    = 0 0 1
-              vec    = 1 0 0
-              imesh  = 4.9 25.4  iints = 1 1
-              jmesh  = 78.105    jints = 1
-              kmesh  = 1         kints = 1
-              emesh  = 0.001 0.01 i 0.03 i 0.06 0.07 0.075 0.1 i 0.2 i 0.4
-                       0.45 0.51 0.512 0.6 i 0.8 1 1.33 1.34 i 1.66
-                       2 11i 8 2i 14 20 30 50
-              factor = 3.113519e13
-c
-  fc144       1-MeV(Si) equivalent neutron flux in the irradiation volume
-  fmesh144:n  geom   = cyl
-              origin = 0 0 16.51
-              axs    = 0 0 1
-              vec    = 1 0 0
-              imesh  = 4.9 25.4  iints = 1 1
-              jmesh  = 78.105    jints = 1
-              kmesh  = 1         kints = 1
-              factor = 3.113519e13
-  fm144       10.5263 311 444
-c
-  fc154       Neutron kerma in silicon in the irradiation volume
-  fmesh154:n  geom   = cyl
-              origin = 0 0 16.51
-              axs    = 0 0 1
-              vec    = 1 0 0
-              imesh  = 4.9 25.4  iints = 1 1
-              jmesh  = 78.105    jints = 1
-              kmesh  = 1         kints = 1
-              factor = 3.113519e13
-  fm154       3.43541e-10 311 -1 -4
-c
-  fc164       Photon kerma in silicon in the irradiation volume
-  fmesh164:p  geom   = cyl
-              origin = 0 0 16.51
-              axs    = 0 0 1
-              vec    = 1 0 0
-              imesh  = 4.9 25.4  iints = 1 1
-              jmesh  = 78.105    jints = 1
-              kmesh  = 1         kints = 1
-              factor = 3.113519e13
-  fm164       3.43541e-10 311 -5 -6
 c
 c     Peak values around the target chamber: a cylindrical shell from r = 4.9 to 5 cm (against
 c     the chamber's outer wall), 5 cm tall, centered at z = 55.88 cm, the second radial bin

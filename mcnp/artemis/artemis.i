@@ -29,8 +29,7 @@ c  the zoomed plot_xy_cavity and plot_xz_cavity).
 c
 c  Tally numbers mean the same in every deck of this repository
 c  (mcnp/<system>/<system>.i); a deck leaves out those it has no use for:
-c    1q4         averages over the irradiation volume: in Artemis, cell
-c                tallies in the cassette regions
+c    1q4         cell tallies in the cassette regions (Artemis only)
 c    2q4, 3q4    peak values in the -x and +x cassette regions, on a 5 x 5 cm
 c                plate, 0.1 cm thick, from x = +-7.8 cm (about as close to
 c                the target chamber as a part in the cassette can get), at

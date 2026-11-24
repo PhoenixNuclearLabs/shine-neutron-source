@@ -20,8 +20,8 @@
 # - Tallies are already absolute rates: OpenMC scales them by the total strength of the sources,
 #   which beam-target gives in n/s (their sum is the total neutron yield), as the MCNP model does
 #   with factor. But flux tallies are not divided by volume: divide each mesh tally by the volume
-#   of a mesh element. The cylindrical meshes of the irradiation volume and peak tallies start at
-#   r = 4.9 cm, so each has the one bin that is the second radial bin in MCNP.
+#   of a mesh element. The cylindrical meshes of the peak tallies start at r = 4.9 cm, so each has
+#   the one bin that is the second radial bin in MCNP.
 #
 # The neutron source comes from ../../source/Apollo/source.h5, made by beam-target
 # (https://github.com/lucasjacobson/beam-target), and is read with
@@ -492,10 +492,6 @@ MESH_BINS = {"room": 5.08, "chamber": 1.27}
 # Energy groups of the neutron mesh tallies [eV]: below 0.5 eV, 0.5 eV to 0.1 MeV, 0.1 to 10 MeV,
 # and above 10 MeV (up to the top of the spectrum's bins), as emesh in the MCNP deck
 NEUTRON_GROUPS = [0.0, 0.5, 1e5, 1e7, 1e9]
-# Irradiation volume, Apollo's counterpart of Artemis's cassette regions: a cylindrical shell around
-# the chamber from its outer wall (r = 4.9 cm) to r = 25.4 cm (10 inches), over the height of
-# Artemis's cassette regions, 152.4 liters
-R_IRR, Z_IRR = (4.9, 25.4), (16.51, 94.615)
 # Peak values: a cylindrical shell against the chamber's outer wall, from r = 4.9 to 5 cm, 5 cm
 # tall, centered at the height of the peak flux (the height of the plot_xy planes)
 R_PEAK, Z_PEAK, H_PEAK = (4.9, 5.0), 55.88, 5.0
@@ -539,10 +535,10 @@ QUANTITIES = {
     "nkerma": ("Neutron kerma in silicon", "neutron"),
     "pkerma": ("Photon kerma in silicon", "photon"),
 }
-# Tally numbers, as in the MCNP deck (see its header). The tens digit q of the irradiation volume
-# and peak tallies is the quantity; 1q4 are the averages over the irradiation volume, and 2q4 the
-# peak values. The maps take a hundred per quantity (4xx to 8xx), with the window in the tens digit:
-# 1 to 3 for the xy, xz, and yz planes of the room view, 4 to 6 for those of the chamber view.
+# Tally numbers, as in the MCNP deck (see its header). The tens digit q of the peak tallies (2q4) is
+# the quantity. The maps take a hundred per quantity (4xx to 8xx), with the window in the tens
+# digit: 1 to 3 for the xy, xz, and yz planes of the room view, 4 to 6 for those of the chamber
+# view.
 Q = {"neutron": 1, "nspectrum": 2, "pspectrum": 3, "si": 4, "nkerma": 5, "pkerma": 6}
 MAP_BASE = {"neutron": 400, "photon": 500, "si": 600, "nkerma": 700, "pkerma": 800}
 WINDOW = {"xy": 1, "xz": 2, "yz": 3}
@@ -577,10 +573,10 @@ def get_tallies():
         t.scores = ["flux"]
         tallies.append(t)
 
-    # The irradiation volume (1q4) and the peak (2q4): one-bin cylindrical meshes, for the neutron
+    # The peak (2q4): one-bin cylindrical meshes, for neutrons in the four groups, the neutron
     # spectrum, the photon spectrum, the 1-MeV(Si) equivalent neutron flux, and the neutron and
-    # photon kerma in silicon, and at the peak also neutrons in the four groups
-    irradiation = shell(124, R_IRR, *Z_IRR)  # numbered as their first tallies
+    # photon kerma in silicon
+    # The mesh is numbered as its first tally
     peak = shell(214, R_PEAK, Z_PEAK - H_PEAK / 2, Z_PEAK + H_PEAK / 2)
     for q, what, particle, energy_filter in [
         ("neutron", "neutron flux", "neutron", groups),
@@ -590,9 +586,6 @@ def get_tallies():
         ("nkerma", "neutron kerma in silicon", "neutron", energy["nkerma"]),
         ("pkerma", "photon kerma in silicon", "photon", energy["pkerma"]),
     ]:
-        if q != "neutron":
-            tally(100 + 10 * Q[q] + 4, f"{what[0].upper() + what[1:]} in the irradiation volume",
-                  irradiation, only[particle], energy_filter)  # fmt: skip
         tally(200 + 10 * Q[q] + 4, f"Peak {what} around the chamber", peak, only[particle],
               energy_filter)  # fmt: skip
 
