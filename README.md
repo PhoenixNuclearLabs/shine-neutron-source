@@ -72,20 +72,24 @@ Each system has its own files, named after it (`<system>` is `artemis` or `apoll
   geometry plots in `images/` needs MCNP and Ghostscript, since the MCNP plotter writes only
   PostScript; the OpenMC geometry plots need only OpenMC.
 
-**Run the models** (10⁸ histories each, about 1.6 to 1.8 hours per code on 32 cores):
+**Run the models** (10⁷ histories each, about 10 minutes per code on 32 cores):
 
 ```bash
 # MCNP, from mcnp/<system>/ (remove the <system>.i* outputs of an earlier run first)
 cd mcnp/artemis
-mcnp6 n=artemis.i tasks 14
+mcnp6 n=artemis.i tasks 32
 
 # OpenMC, from anywhere (it writes its files in openmc/<system>/)
 export OPENMC_CROSS_SECTIONS=/path/to/endfb-viii.1/cross_sections.xml
-python openmc/artemis/artemis.py --threads 14
+python openmc/artemis/artemis.py --threads 32
 ```
 
-The MCNP runs write a restart dump every 10⁷ histories, and the OpenMC runs a statepoint after
-every batch (10⁷ histories); `--restart` continues an OpenMC run from its latest statepoint.
+10⁷ histories give the peak values to about 1% or better (the thermal neutron flux to a few
+percent) and smooth maps near the chamber. The published results used 10⁸ (`nps 1e8` in MCNP, and
+`settings.particles = int(1e7)` in OpenMC), which is needed only for smooth maps far from the
+chamber; 10⁶ gives the peak neutron flux to about 1% in a minute. The MCNP runs write a restart
+dump every 10⁷ histories, and the OpenMC runs a statepoint after every batch (10⁶ histories); `--restart`
+continues an OpenMC run from its latest statepoint.
 
 **Make the plots and tables**, from the top of the repository:
 

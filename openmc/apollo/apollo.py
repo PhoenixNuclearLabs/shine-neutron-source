@@ -619,9 +619,9 @@ def get_settings(sources):
     settings.source           = sources
     settings.photon_transport = True
     settings.batches          = 10
-    settings.particles        = int(1e7)
+    settings.particles        = int(1e6)
 
-    # A statepoint after every batch (each batch is 1e7 histories), with the source bank, so a run
+    # A statepoint after every batch (each batch is 1e6 histories), with the source bank, so a run
     # that stops can be continued with --restart
     settings.statepoint       = {'batches': list(range(1, settings.batches + 1))}
     settings.sourcepoint      = {'write': True}
